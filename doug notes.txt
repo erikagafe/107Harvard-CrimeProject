@@ -1,0 +1,11 @@
+---
+title: "Data Notes from Doug"
+author: "Doug Walton"
+date: "April 17, 2016"
+output: html_document
+---
+
+This is a document for providing background information that I have uploaded to the repository.
+
+cv14.zip
+From US Bureau of Justice report "Criminal Victimization in 2014". This seemed to be latest one to give high level national statistics about violent vst property crime. (http://www.bjs.gov/index.cfm?ty=pbdetail&iid=5366.)
