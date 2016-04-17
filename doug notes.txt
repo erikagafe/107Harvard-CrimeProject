@@ -9,3 +9,10 @@ This is a document for providing background information that I have uploaded to 
 
 cv14.zip
 From US Bureau of Justice report "Criminal Victimization in 2014". This seemed to be latest one to give high level national statistics about violent vst property crime. (http://www.bjs.gov/index.cfm?ty=pbdetail&iid=5366.)
+
+
+
+Tables from the FBI Uniform Crime Reporting (UCR) statistics table maker
+http://www.ucrdatatool.gov/Search/Crime/Crime.cfm
+All states and all types for 2012
+UCR2012-crimebyusstate.csv
