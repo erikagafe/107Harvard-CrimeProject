@@ -1,7 +1,7 @@
 ---
 title: "Data Notes from Doug"
 author: "Doug Walton"
-date: "April 17, 2016"
+date: "April 20, 2016"
 output: html_document
 ---
 
@@ -27,9 +27,11 @@ Different formats of age/sex and household data for 2014.
 ACS_145yr_DP05.zip - example of table with annotations separated from data. 
 ACS_145yr_DP05a.zip - same example in "single file" with annotations format
 ACS_14_5YR_DP05.xls - excel version
+Similar formats available for a wide variety of conditions and regional breakdowns
 
-California demograhpic profile
+California demographic profile
 ca20101.dp.zip - but I don't understand how to read it or unzip it right yet. 
+all other states available.
 
 IV. GapMinder
 indicator_t above 15 unemploy.xls - sample of unemployment by country. Kind of high level.
