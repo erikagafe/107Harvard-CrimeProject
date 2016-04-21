@@ -33,7 +33,15 @@ California demographic profile
 ca20101.dp.zip - but I don't understand how to read it or unzip it right yet. 
 all other states available.
 
-IV. GapMinder
+IV. Eurostat
+Crime classifications: Intentional homicide, rape, sexual assault
+crim_hom.soff.tsv -- a TSV file from Intentional homicide and sexual offences by legal status and sex of the person involved - number and rate for the relevant sex group (crim_hom_soff)
+
+Census 2011 by age, sex, region in CSV and excel formats
+csvoutput_HC55_2016_04_21_03_15.csv
+xlsoutput_HC55_2016_04_21_03_15.xlx
+
+V. GapMinder
 indicator_t above 15 unemploy.xls - sample of unemployment by country. Kind of high level.
 
 Not Included Yet
