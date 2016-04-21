@@ -15,12 +15,25 @@ From US Bureau of Justice report "Criminal Victimization in 2014". This seemed t
 
 II. Tables from the FBI Uniform Crime Reporting (UCR) statistics table maker
 http://www.ucrdatatool.gov/Search/Crime/Crime.cfm
+These tables by state also include US total
 A. All states and all types for 2012. Similar tables are possible for prior years on a year-by-year basis
 UCR2012-crimebyusstate.csv
 
-B. Historical table for one crime (this one for murder and non-negligent manslaughter)
-UCRmurder1960-2012
+B. Historical table for one crime (this one for murder and non-negligent manslaughter). Similar tables for other crimes are possible. 
+UCR1960-2012murderbystate.csv
 
+III. US Census Bureau
+Different formats of age/sex and household data for 2014.
+ACS_145yr_DP05.zip - example of table with annotations separated from data. 
+ACS_145yr_DP05a.zip - same example in "single file" with annotations format
+ACS_14_5YR_DP05.xls - excel version
 
+California demograhpic profile
+ca20101.dp.zip - but I don't understand how to read it or unzip it right yet. 
 
+IV. GapMinder
+indicator_t above 15 unemploy.xls - sample of unemployment by country. Kind of high level.
 
+Not Included Yet
+
+arcgis.com - has limited public account, 60-day free trial, otherwise $2500/year for 5 people
