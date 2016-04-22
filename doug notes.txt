@@ -7,6 +7,15 @@ output: html_document
 
 This is a document for providing background information that I have uploaded to the repository.
 
+FILES IN ROOT (constructed)
+us_national.xls - an excel file compiled from files in sources.
+
+FILES IN SOURCES
+files from the Statistical Abstract of the United States: 2012
+12s0001.xls
+12s0002.xls
+
+FILES IN EXAMPLES
 I. US Bureau of Justice
 cv14.zip
 From US Bureau of Justice report "Criminal Victimization in 2014". This seemed to be latest one to give high level national statistics about violent vst property crime. (http://www.bjs.gov/index.cfm?ty=pbdetail&iid=5366.)
