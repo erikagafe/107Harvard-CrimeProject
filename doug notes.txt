@@ -1,19 +1,24 @@
 ---
 title: "Data Notes from Doug"
 author: "Doug Walton"
-date: "April 20, 2016"
-output: html_document
+date: "April 25, 2016"
 ---
 
 This is a document for providing background information that I have uploaded to the repository.
 
 FILES IN ROOT (constructed)
-us_national.xls - an excel file compiled from files in sources.
+us_national.xls  - an excel file compiled from files in sources.
+sfDem-example.csv - an example output from UScensus2010 package, demographics function
+dougs code.Rmd - r markdown for some code examples and manipulating some of the datasets
 
 FILES IN SOURCES
 files from the Statistical Abstract of the United States: 2012
-12s0001.xls
-12s0002.xls
+12s0001.xls - general population
+12s0002.xls - general population
+12s0315.xls - crime by type 1995 to 2009
+12s0059.xls - Household by type 1995 to 2009
+ACS_14_1YR_S0201.xls - selected characteristics from San Francisco County (2014 but can be obtained to 2007)
+
 
 FILES IN EXAMPLES
 I. US Bureau of Justice

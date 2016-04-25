@@ -1,0 +1,173 @@
+---
+title: "Dougs Crime Analysis"
+author: "Doug Walton"
+date: "April 22, 2016"
+output: html_document
+---
+
+This document contains the code I am using to manipulate the demographic and crime files. Starting with U.S. census bureau data to put together a working table for national population and looking a historical approach - how things changed over time. 
+
+Some focusing questions:
+1. Is the prevelance of a traditional household an influence on violent crime? 
+2. Is income level an influence on violent crime? 
+3. Is racial mix an influence on viloent crime? 
+
+
+I suppose an alternate (or complementary) approach would be comparing the current state of country or city 1 to country and city 2.
+
+
+Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
+
+1. us_national.csv is population by year from 1900 to 2015. initially derived from Section 1, Tables 1 & 2. Lagging zeros filled in on earlier years to make everything in consistent units (removed '000s reduction). Added years 2010 to 2015 from PEPANNRES annual estimates of population (found through American Fact Finder.)
+
+2. 
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+
+# Construction of master table for US national data
+# Starting with reading in population
+uspop <- read.csv("us_national.csv")
+uspop$year <- as.character(uspop$year)
+
+# Add household data - for a test will see if families in couples has any correpondence
+UShousehold <- read.csv("Sources/12s0059-households.csv")
+UShousehold$Type.of.unit <- as.character(UShousehold$Type.of.unit)
+UShousehold$Type.of.unit[3] <- "Household_white"
+UShousehold$Type.of.unit[4] <- "Household_black"
+UShousehold$Type.of.unit[5] <- "Household_hispanic"
+UShousehold_s <- UShousehold %>% filter(Type.of.unit %in% c("Households","Household_white","Household_black","Household_hispanic","..Family households","....Married couple","..Nonfamily households"))
+
+cols <- UShousehold_s$Type.of.unit
+UShousehold_s <- as.data.frame(t(UShousehold_s[,-1]))
+colnames(UShousehold_s) <- cols
+UShousehold_s <- add_rownames(UShousehold_s, "year")
+# UShousehold$year <- as.factor(UShousehold$year)
+usnat <- uspop %>% left_join(UShousehold_s, by = 'year')
+
+
+
+# Adding crime data
+UScrime <- read.csv("Sources/12s0315-crime.csv")
+UScrime$X <- as.character(UScrime$X)
+
+#Clean up and filter out some key ones
+UScrime$X[1] <- "All_crimes_total"
+UScrime$X[26] <- "Property_crimes_total"
+UScrime_s <- UScrime %>% filter(X %in% c("All_crimes_total","Crimes of violence","..Rape/sexual assault","..Robbery","..Assault","Property_crimes_total","Theft"))
+
+#Prepare the df
+cols <- UScrime_s$X
+UScrime_s <- as.data.frame(t(UScrime_s[,-1]))
+colnames(UScrime_s) <- cols
+UScrime_s <- add_rownames(UScrime_s, "year")
+# UShousehold$year <- as.factor(UShousehold$year)
+usnat2 <- usnat %>% left_join(UScrime_s, by = 'year')
+
+
+```
+
+Here are some preliminary plots for fun
+
+```{r}
+usnat2 <- usnat2 %>% filter(year <= 'X2009' & year >= 'X1995') %>% mutate(crimepct = All_crimes_total/residents, housepct = Households/residents)
+
+usnat2  %>% ggplot(aes(year)) + geom_point(aes(y=housepct, col = "blue")) + geom_point(aes(y = crimepct))
+
+cor(usnat2$crimepct,usnat2$housepct)
+cor.test(usnat2$crimepct,usnat2$housepct)
+
+
+```
+
+Notes: So while a historical perspective is possible using a wide varity of data at the national level, it is not clear how to get it at a state, county, or city level without tediously compiling it from many separate files. 
+
+
+Now we go on to trying the UScensus2010 package. This bit required some tricky installation on my machine. I don't think there is a need to download blk, blkgrp, county, or cd unless or until creating maps. 
+
+a. Seems to be mostly for spatial/visualization work, but has demographics pull function that might be easier than making tables with American Fact Finder. 
+
+b. is only for a deep or comparative slice in certain year essentially (such as the 2010 census)
+
+
+
+
+```{r}
+library(UScensus2010)
+library(UScensus2010tract)
+data("california.tract10")
+names(california.tract10)
+
+# msa is the only one that is dem data, the others are spatial data
+sfDem <- demographics(dem = c("P0010001", "P0030002", "P0030003"), "CA", level = "msa", msaname = "San Francisco")
+colnames(sfDem) <- c("Total Pop","White","Black")
+sfDem
+
+# I write this as a csv so you can see the result without using the package
+write.csv(sfDem, file = "sfDem-example.csv")
+```
+
+
+
+Source: Uniform Crime Reporting database (FBI). Has a table builder and can do years by state from 1960 on, so could be interesting. 
+http://www.ucrdatatool.gov/index.cfm
+
+Notes:
+Can trace down to the LE agency level, but it would be a lot of work to match them automatically to county level stats from the census. 
+
+
+```{r}
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+Source: U.S. Bureau of Justice Statistics
+Covers many aspects of the justice system. The reported crimes focus on the type of vicitimization. Time period covered is about 1993 onward for types of victimization. 
+
+http://www.bjs.gov/
+
+
+
+
+
+
+This is just holding spot for some archive or work in progress
+
+```{r, echo=FALSE}
+# some archival stuff
+# Add household data - old working
+UShousehold <- read.csv("Sources/12s0059-households.csv")
+cols <- UShousehold$Type.of.unit
+UShousehold <- UShousehold[,-1]
+UShousehold <- as.data.frame(t(UShousehold))
+colnames(UShousehold) <- cols
+UShousehold <- add_rownames(UShousehold, "year")
+USnat <- USnat %>% left_join(UShousehold, by = 'year')
+
+# Function for US Census dataframe transpose - nonfunctional at the moment
+dftrans <- function(dat) {
+  cols <- UShousehold$Type.of.unit
+  dat <- as.data.frame(t(dat[,-1]))
+  colnames(dat) <- cols
+  dat <- add_rownames(dat, "year")
+  return(dat)
+}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
