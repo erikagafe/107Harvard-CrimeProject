@@ -1,0 +1,21 @@
+---
+title: "Demographic Effects on Crime"
+date: "May 4, 2016"
+output: html_document
+---
+ 
+# Project Overview
+## Motivation
+Team members background includes interests in psychology, dynamics of social change and criminology. Crime stories are showcased all over media and gain much attention. All the team members are fascinated with exploring effects of demographics on crime.
+
+##Objectives
+To identify key demographic factors that predict the prevalence of a particular kind of crime. 
+Identify if these influences are better understood at national, metropolitan, or regional levels. We will let the data guide us, our scope will be to cover major European, Canadian and US cities (based on the data we find). 
+Focus will be on homicide, robbery and assault crimes and demographics such as age, education and median income/cost of living.
+
+
+##Approach
+
+#Analysis
+
+##Prediction
