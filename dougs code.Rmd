@@ -5,16 +5,30 @@ date: "April 22, 2016"
 output: html_document
 ---
 
-This document contains the code I am using to manipulate the demographic and crime files. Starting with U.S. census bureau data to put together a working table for national population and looking a historical approach - how things changed over time. 
+This document contains the code I am using to manipulate the demographic and crime files.
 
 Some focusing questions:
-1. Is the prevelance of a traditional household an influence on violent crime? 
-2. Is income level an influence on violent crime? 
-3. Is racial mix an influence on viloent crime? 
+1. Are demographics correlaed with the prevalance of either homicide or rape?
+Possible factors
+
+	1. sex
+	2. age
+	3. household type
+	4. racial mix
+		1. white
+		2. black
+		3. hispanic
+	5. income
+	6. education 
+
+Approach #1
+Starting with U.S. census bureau data to put together a working table for national population and looking a historical approach - how things changed over time. 
+
+Approach #2
+Comparing state-to-state and county-to-county.
 
 
-I suppose an alternate (or complementary) approach would be comparing the current state of country or city 1 to country and city 2.
-
+BUILD UP of APPROACH 1
 
 Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
 
