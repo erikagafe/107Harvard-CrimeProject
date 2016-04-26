@@ -1,7 +1,7 @@
 ---
 title: "Data Notes from Doug"
 author: "Doug Walton"
-date: "April 25, 2016"
+date: "April 26, 2016"
 ---
 
 This is a document for providing background information that I have uploaded to the repository.
@@ -24,6 +24,11 @@ ACS_14_1YR_S0201.xls - selected characteristics from San Francisco County (2014 
 12x0312 - homicide trends 1980 to 2008
 12s0314.xls - forcible rape 1980 to 2008
 12s0007, 12s0010 - population by age and sex 1990, 2000, 2010
+12s0233.xls - educational attainment by state
+12s0230.xls - eductional attainment by race and sex 1960 - 2010
+12s0701.xls - median income by race and sex from 1947 to 2009
+
+
 
 
 FILES IN EXAMPLES

@@ -11,15 +11,12 @@ Some focusing questions:
 1. Are demographics correlaed with the prevalance of either homicide or rape?
 Possible factors
 
-	1. sex
+	1. household type
 	2. age
-	3. household type
-	4. racial mix
-		1. white
-		2. black
-		3. hispanic
-	5. income
-	6. education 
+	3. sex
+	4. racial mix (white, black, hispanic)
+	5. education
+	6. individual income (median)
 
 Approach #1
 Starting with U.S. census bureau data to put together a working table for national population and looking a historical approach - how things changed over time. 
@@ -34,7 +31,8 @@ Starting with tables derived from the 2012 Statistical Abstract of the United St
 
 1. us_national.csv is population by year from 1900 to 2015. initially derived from Section 1, Tables 1 & 2. Lagging zeros filled in on earlier years to make everything in consistent units (removed '000s reduction). Added years 2010 to 2015 from PEPANNRES annual estimates of population (found through American Fact Finder.)
 
-2. 
+2. Households in the US. According to the census data dictionary: "A household that has at least one member of the household related to the householder by birth, marriage, or adoption is a "Family household."  Same-sex couple households are included in the family households category if there is at least one additional person related to the householder by birth or adoption.  Same-sex couple households with no relatives of the householder present are tabulated in nonfamily households.  Responses of "same-sex spouse" were edited during processing to "unmarried partner."  "Nonfamily households" consist of people living alone and households which do not have any members related to the householder."
+
 
 ```{r}
 library(dplyr)
@@ -42,19 +40,15 @@ library(tidyr)
 library(ggplot2)
 library(readr)
 
-# Construction of master table for US national data
-# Starting with reading in population
+# Construction of master table for US national data by year
 uspop <- read.csv("us_national.csv")
 uspop$year <- as.character(uspop$year)
 
 # Add household data - for a test will see if families in couples has any correpondence
 UShousehold <- read.csv("Sources/12s0059-households.csv")
 UShousehold$Type.of.unit <- as.character(UShousehold$Type.of.unit)
-UShousehold$Type.of.unit[3] <- "Household_white"
-UShousehold$Type.of.unit[4] <- "Household_black"
-UShousehold$Type.of.unit[5] <- "Household_hispanic"
-UShousehold_s <- UShousehold %>% filter(Type.of.unit %in% c("Households","Household_white","Household_black","Household_hispanic","..Family households","....Married couple","..Nonfamily households"))
-
+UShousehold$Type.of.unit[3:9] <- c("Household_white","Household_black","Household_hispanic","fam_household","couple_household","male_household","fem_household")
+UShousehold_s <- UShousehold %>% slice(1:9)
 cols <- UShousehold_s$Type.of.unit
 UShousehold_s <- as.data.frame(t(UShousehold_s[,-1]))
 colnames(UShousehold_s) <- cols
@@ -64,22 +58,19 @@ usnat <- uspop %>% left_join(UShousehold_s, by = 'year')
 
 
 
+
+
+
+
+
+
+
 # Adding crime data
-UScrime <- read.csv("Sources/12s0315-crime.csv")
-UScrime$X <- as.character(UScrime$X)
+UScrime <- read.csv("Sources/12s0306-tot_in_thousands_ofcrimetype1980-2009.csv")
+UScrime$year <- as.character(UScrime$year)
+UScrime[2:6] <- UScrime[2:3] * 1000
+usnat2 <- usnat %>% left_join(UScrime, by = 'year')
 
-#Clean up and filter out some key ones
-UScrime$X[1] <- "All_crimes_total"
-UScrime$X[26] <- "Property_crimes_total"
-UScrime_s <- UScrime %>% filter(X %in% c("All_crimes_total","Crimes of violence","..Rape/sexual assault","..Robbery","..Assault","Property_crimes_total","Theft"))
-
-#Prepare the df
-cols <- UScrime_s$X
-UScrime_s <- as.data.frame(t(UScrime_s[,-1]))
-colnames(UScrime_s) <- cols
-UScrime_s <- add_rownames(UScrime_s, "year")
-# UShousehold$year <- as.factor(UShousehold$year)
-usnat2 <- usnat %>% left_join(UScrime_s, by = 'year')
 
 
 ```
@@ -87,9 +78,12 @@ usnat2 <- usnat %>% left_join(UScrime_s, by = 'year')
 Here are some preliminary plots for fun
 
 ```{r}
-usnat2 <- usnat2 %>% filter(year <= 'X2009' & year >= 'X1995') %>% mutate(crimepct = All_crimes_total/residents, housepct = Households/residents)
+usnat3 <- usnat2 %>% filter(year <= 'X2009' & year >= 'X1980') %>% mutate(crimepct = tot_violent/residents, housepct = Households/residents)
 
-usnat2  %>% ggplot(aes(year)) + geom_point(aes(y=housepct, col = "blue")) + geom_point(aes(y = crimepct))
+
+
+usnat3  %>% ggplot(aes(year)) + geom_point(aes(y=housepct, col = "blue"))
+usnat3  %>% ggplot(aes(year)) + geom_point(aes(y = crimepct))
 
 cor(usnat2$crimepct,usnat2$housepct)
 cor.test(usnat2$crimepct,usnat2$housepct)
@@ -181,6 +175,22 @@ dftrans <- function(dat) {
   dat <- add_rownames(dat, "year")
   return(dat)
 }
+
+# method for using crime victimization types 
+UScrime <- read.csv("Sources/12s0315-crime.csv")
+UScrime$X <- as.character(UScrime$X)
+
+#Clean up and filter out some key ones
+UScrime_s <- UScrime %>% filter(X %in% c("All_crimes_total","Crimes of violence","..Rape/sexual assault","..Robbery","..Assault","Property_crimes_total","Theft"))
+
+#Prepare the df
+cols <- UScrime_s$X
+UScrime_s <- as.data.frame(t(UScrime_s[,-1]))
+colnames(UScrime_s) <- cols
+UScrime_s <- add_rownames(UScrime_s, "year")
+# UShousehold$year <- as.factor(UShousehold$year)
+usnat2 <- usnat %>% left_join(UScrime_s, by = 'year')
+
 
 ```
 
