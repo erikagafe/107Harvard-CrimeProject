@@ -1,7 +1,7 @@
 ---
 title: "Dougs Crime Analysis"
 author: "Doug Walton"
-date: "April 22, 2016"
+date: "April 26, 2016"
 output: html_document
 ---
 
@@ -31,7 +31,13 @@ Starting with tables derived from the 2012 Statistical Abstract of the United St
 
 1. us_national.csv is population by year from 1900 to 2015. initially derived from Section 1, Tables 1 & 2. Lagging zeros filled in on earlier years to make everything in consistent units (removed '000s reduction). Added years 2010 to 2015 from PEPANNRES annual estimates of population (found through American Fact Finder.)
 
+I then take selected chosen areas from different census tables to add to this national master.
+
 2. Households in the US. According to the census data dictionary: "A household that has at least one member of the household related to the householder by birth, marriage, or adoption is a "Family household."  Same-sex couple households are included in the family households category if there is at least one additional person related to the householder by birth or adoption.  Same-sex couple households with no relatives of the householder present are tabulated in nonfamily households.  Responses of "same-sex spouse" were edited during processing to "unmarried partner."  "Nonfamily households" consist of people living alone and households which do not have any members related to the householder."
+
+3. Income. This table gives income in 2009 dollars for varous ethnic groups and males/females. Since, the ways that income has has been reported seems to have shifted in 2002 such that some categories like "White" have subgroups instead, some adjustments were made. The subgroups are similar, so I just averaged them back into the top line. Those distinctions aren't going to make much of a difference for a modeling the fit (or could be more fully explored later).
+
+4. Educational attainment. Only high school+ and college+ were available.
 
 
 ```{r}
@@ -48,7 +54,7 @@ uspop$year <- as.character(uspop$year)
 UShousehold <- read.csv("Sources/12s0059-households.csv")
 UShousehold$Type.of.unit <- as.character(UShousehold$Type.of.unit)
 UShousehold$Type.of.unit[3:9] <- c("Household_white","Household_black","Household_hispanic","fam_household","couple_household","male_household","fem_household")
-UShousehold_s <- UShousehold %>% slice(1:9)
+UShousehold_s <- UShousehold %>% slice(1:9) %>% select(-X1960) # eliminate gap
 cols <- UShousehold_s$Type.of.unit
 UShousehold_s <- as.data.frame(t(UShousehold_s[,-1]))
 colnames(UShousehold_s) <- cols
@@ -56,13 +62,19 @@ UShousehold_s <- add_rownames(UShousehold_s, "year")
 # UShousehold$year <- as.factor(UShousehold$year)
 usnat <- uspop %>% left_join(UShousehold_s, by = 'year')
 
+# Income
+USincome <- read.csv("Sources/12s0701-median-income-2009-dollars.csv")
+USincome$X <- as.character(USincome$X)
+cols <- USincome$X
+USincome_s <- as.data.frame(t(USincome[,-1]))
+colnames(USincome_s) <- cols
+USincome_s <- add_rownames(USincome_s, "year")
+usnat <- usnat %>% left_join(USincome_s, by = 'year')
 
-
-
-
-
-
-
+# Educational Attainment
+USedu <- read.csv("Sources/12s0230-education.csv")
+USedu$year <- as.character(USedu$year)
+usnat <- usnat %>% left_join(USedu, by = 'year')
 
 
 # Adding crime data
@@ -81,12 +93,11 @@ Here are some preliminary plots for fun
 usnat3 <- usnat2 %>% filter(year <= 'X2009' & year >= 'X1980') %>% mutate(crimepct = tot_violent/residents, housepct = Households/residents)
 
 
+usnat3  %>% ggplot(aes(year)) + geom_point(aes(y=housepct, col = "blue")) + geom_point(aes(y = crimepct))
 
-usnat3  %>% ggplot(aes(year)) + geom_point(aes(y=housepct, col = "blue"))
-usnat3  %>% ggplot(aes(year)) + geom_point(aes(y = crimepct))
-
-cor(usnat2$crimepct,usnat2$housepct)
-cor.test(usnat2$crimepct,usnat2$housepct)
+# probably doesn't mean anything
+cor(usnat3$crimepct,usnat3$housepct)
+cor.test(usnat3$crimepct,usnat3$housepct)
 
 
 ```
@@ -149,6 +160,11 @@ Covers many aspects of the justice system. The reported crimes focus on the type
 
 http://www.bjs.gov/
 
+```{r}
+
+
+
+```
 
 
 
@@ -194,4 +210,8 @@ usnat2 <- usnat %>% left_join(UScrime_s, by = 'year')
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Process Notes
+1. there are a bunch of footnotes and assumptions made, would probably need to re-examine the effect at some point. 
+2. There are fields selected from tables, maybe others were important.
+3. fields and ways of accounting for things changing over time
+
