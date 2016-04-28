@@ -76,6 +76,8 @@ USedu <- read.csv("Sources/12s0230-education.csv")
 USedu$year <- as.character(USedu$year)
 usnat <- usnat %>% left_join(USedu, by = 'year')
 
+# population, age, sex 2000 to 2010
+USbasic2010 <- read.csv("Sources/US-EST00INT-ALLDATA.csv")
 
 # Adding crime data
 UScrime <- read.csv("Sources/12s0306-tot_in_thousands_ofcrimetype1980-2009.csv")

@@ -13,23 +13,38 @@ dougs code.Rmd - r markdown for some code examples and manipulating some of the 
 
 FILES IN SOURCES
 files from the Statistical Abstract of the United States: 2012
+National
 12s0001.xls - general population
 12s0002.xls - general population
 12s0315.xls - detailed crime by victimization type 1995 to 2009
 12s0306.xls - crime by type 1980 to 2009, in 1000s
 12s0059.xls - Household by type 1995 to 2009
-ACS_14_1YR_S0201.xls - selected characteristics from San Francisco County (2014 but can be obtained to 2007)
-
 12s0306-tot_in_thousands_ofcrimetype1980-2009.xls  - table extracted from 12s306 and formatted.
 12x0312 - homicide trends 1980 to 2008
 12s0314.xls - forcible rape 1980 to 2008
 12s0007, 12s0010 - population by age and sex 1990, 2000, 2010
-12s0233.xls - educational attainment by state
-12s0230.xls - eductional attainment by race and sex 1960 - 2010
+12s0230.xls - educational attainment by race and sex 1960 - 2010
 12s0701.xls - median income by race and sex from 1947 to 2009
+12s0678.xls - personal income by type from 1929 to 2010
+US-EST00INT-01.xls - Sex and age 2000-2010 - age breakdowns
+US-EST00INT-02.xls - Sex, Race, and Hispanic Origin 2000 to 2010, years in columns
+US-EST00INT-ALLDATA.xls - 2000 to 2010 - dataet of age, sex, orging
+US-EST00INT-ALLDATA.pdf - file explaining the layout
+nat-srh.txt - Resident Population Estimates of the United States by Sex, Race, and
+  Hispanic Origin:  April 1, 1990 to July 1, 1999, with Short-Term
+  Projection to November 1, 2000.
 
 
+State Stuff
+12s0233.xls - educational attainment by state
+12s0680.xls - personal income by state
+12s0681.xls - personal income per capita by state
+12s0682.xls - disposible income per capita by state
+12s0013.xls - resident population by state
 
+
+Community
+ACS_14_1YR_S0201.xls - selected characteristics from San Francisco County (2014 but can be obtained to 2007)
 
 FILES IN EXAMPLES
 I. US Bureau of Justice
