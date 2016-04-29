@@ -34,10 +34,13 @@ Starting with tables derived from the 2012 Statistical Abstract of the United St
 I then take selected chosen areas from different census tables to add to this national master.
 
 2. Households in the US. According to the census data dictionary: "A household that has at least one member of the household related to the householder by birth, marriage, or adoption is a "Family household."  Same-sex couple households are included in the family households category if there is at least one additional person related to the householder by birth or adoption.  Same-sex couple households with no relatives of the householder present are tabulated in nonfamily households.  Responses of "same-sex spouse" were edited during processing to "unmarried partner."  "Nonfamily households" consist of people living alone and households which do not have any members related to the householder."
-
+file ACS_14_5YR_B11002.xls and B11001, B11001A, B11001I,used to
+B11001
 3. Income. This table gives income in 2009 dollars for varous ethnic groups and males/females. Since, the ways that income has has been reported seems to have shifted in 2002 such that some categories like "White" have subgroups instead, some adjustments were made. The subgroups are similar, so I just averaged them back into the top line. Those distinctions aren't going to make much of a difference for a modeling the fit (or could be more fully explored later).
 
 4. Educational attainment. Only high school+ and college+ were available.
+
+5. Compiled from .... and also UCR ucr-us-murder1960-2012.csv. , ucr-us-rape1960-2012.csv
 
 
 ```{r}
@@ -78,24 +81,34 @@ usnat <- usnat %>% left_join(USedu, by = 'year')
 
 # population, age, sex 2000 to 2010
 USbasic2010 <- read.csv("Sources/US-EST00INT-ALLDATA.csv")
+USbasic2010 <- USbasic2010 %>% filter(AGE != '999' & MONTH != '4')
+USbasic2010 <- USbasic2010[,-1]
+USbasic2010sum <- USbasic2010 %>% group_by(YEAR) %>% summarise(avg_age = mean(AGE), tot_male = sum(TOT_MALE), tot_female = sum(TOT_FEMALE), white_male_pop = sum(WA_MALE),white_female_pop = sum(WA_FEMALE),black_male_pop = sum(BA_MALE),black_female_pop = sum(BA_FEMALE),hisp_male_pop = sum(H_MALE),hisp_female_pop = sum(H_FEMALE))
+USbasic2010sum <- rename(USbasic2010sum, year = YEAR)
+USbasic2010sum$year <- paste0("X",USbasic2010sum$year)
+usnat <- usnat %>% left_join(USbasic2010sum, by = 'year')
 
 # Adding crime data
 UScrime <- read.csv("Sources/12s0306-tot_in_thousands_ofcrimetype1980-2009.csv")
-UScrime$year <- as.character(UScrime$year)
-UScrime[2:6] <- UScrime[2:3] * 1000
+UScrime$year <- paste0("X",UScrime$year)
+UScrime[2:6] <- UScrime[2:6] * 1000
 usnat2 <- usnat %>% left_join(UScrime, by = 'year')
 
 
 
 ```
 
-Here are some preliminary plots for fun
+Households. First, we explore the question of whether perhaps more "broken" or non-traditional male-female households could create an increase in crime. So for an indicator, the relationship of households in couples is compared against the the homicide and rape crime rates. 
 
 ```{r}
-usnat3 <- usnat2 %>% filter(year <= 'X2009' & year >= 'X1980') %>% mutate(crimepct = tot_violent/residents, housepct = Households/residents)
+# making a special table, households was in 1000s
+usnat_house_murder <- usnat2 %>% filter(year <= 'X2012' & year >= 'X1970') %>% mutate(murderpct = murder/residents, housepct = (couple_household/residents)*1000)
 
 
-usnat3  %>% ggplot(aes(year)) + geom_point(aes(y=housepct, col = "blue")) + geom_point(aes(y = crimepct))
+
+usnat_house_murder  %>% ggplot(aes(year,murderpct)) + geom_point() 
+
++ geom_point(aes(y = housepct))
 
 # probably doesn't mean anything
 cor(usnat3$crimepct,usnat3$housepct)
