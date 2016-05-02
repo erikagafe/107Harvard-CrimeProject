@@ -8,7 +8,7 @@ output: html_document
  
 # Project Overview
 ## Motivation
-Crime is a topic that terrorizes everybody.  Crime stories are showcased all over media and gain much attention.  Crime changes from country to country, from form to frequency. Why?   What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics? Is crime more common in big cities than is small villages? 
+Crime is a topic that terrorizes everybody.  Crime stories are showcased all over media and gain much attention.  Crime changes from country to country, from form to frequency. Why?   What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics?  Are demographics correlated with the prevalence of either homicide or rape?
 
 Oxford English Dictionary defines crime as the act of harming not only to some individual or individuals but also to a community, society or the state. Crime is such a big concept that we couldn’t research the whole concept. The crimes that will be discussed in this research are homicide and rape in USA, Canada, UK and Germany.
 
@@ -16,12 +16,13 @@ Team background includes interests in psychology, dynamics of social change and 
 
 
 ##Objectives
-One team member has been involved with Criminology Research in Canada. After one discussion we were all very interested in the topic.  There are web pages with relevant work related to Criminology in American cities, [Seattle]( http://www.racketracer.com/2015/03/02/predicting-and-plotting-crime-in-seattle/) and [Chicago](http://dssg.dsapp.org/projects/). These web sites inspired us in our research, but focusing in countries instead of cities. 
-
+One team member has been involved with Criminology Research in Canada. After one discussion we were all very interested in the topic.  There are web pages with relevant work related to Criminology in American cities, [Seattle]( http://www.racketracer.com/2015/03/02/predicting-and-plotting-crime-in-seattle/) and [Chicago](http://dssg.dsapp.org/projects/). These web sites inspired us in our research, but focusing in countries instead of specific cities. 
 
 
 ##Approach
+Our research followed two different approaches. The first is a historical approach to see how thing changed over time. The second is a comparison between state-to-state and county-to-county. 
 
 #Analysis
+
 
 ##Prediction
