@@ -21,6 +21,7 @@ National
 12s0059.xls - Household by type 1995 to 2009
 12s0306-tot_in_thousands_ofcrimetype1980-2009.xls  - table extracted from 12s306 and formatted.
 12x0312 - homicide trends 1980 to 2008
+
 12s0314.xls - forcible rape 1980 to 2008
 12s0007, 12s0010 - population by age and sex 1990, 2000, 2010
 12s0230.xls - educational attainment by race and sex 1960 - 2010
@@ -35,13 +36,17 @@ nat-srh.txt - Resident Population Estimates of the United States by Sex, Race, a
   Projection to November 1, 2000.
 
 
-State Stuff
+State Stuff from USCensus Buruea
 12s0233.xls - educational attainment by state
 12s0680.xls - personal income by state
-12s0681.xls - personal income per capita by state
+12s0681.xls - personal income per capita by state from 2011 Statistical Abstract (2012 had missing 2000-2008)
 12s0682.xls - disposible income per capita by state
 12s0013.xls - resident population by state
-
+11s0229.xls - educational attainment by state, 2011 abstract
+12s0016.xls - age and sex by state
+PE-19.xls - intercensual age, sex, race from 70s
+e7080sta.txt - state population groups from 70s
+ucr-rape-ca-agency1985_2012.csv - report of forcible rate from UCR all agencies in CA
 
 Community
 ACS_14_1YR_S0201.xls - selected characteristics from San Francisco County (2014 but can be obtained to 2007)
@@ -87,3 +92,5 @@ indicator_t above 15 unemploy.xls - sample of unemployment by country. Kind of h
 Not Included Yet
 
 arcgis.com - has limited public account, 60-day free trial, otherwise $2500/year for 5 people
+
+
