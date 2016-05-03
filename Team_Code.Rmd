@@ -1,32 +1,47 @@
 ---
 title: "Demographic effects on Crime"
-author: "Doug Walton, Sameen Awan, Erika"
-date: "April 26, 2016"
+author: "Doug Walton, DureSameen Awan, Erika Garces"
+date: "May 4, 2016"
 output: html_document
 ---
 
 #Effects of Demographics on Specific Crimes
 
-In this project, we explored using publically available data from various U.S. and European government sources and associated R packages to explore whether the rate of either homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. 
+##MOTIVATION
+
+Crime is any act that causes harm to individual(s), communities, society or state. Crime is a topic that terrorizes yet fascinates many people. Crime stories are showcased all over media and gain much attention. Popular crime topics include murder (homicide) or rape. 
+
+Crime changes from country to country, from form to frequency. Why? What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics?
+
+
+##OVERVIEW
+In this project, we explore the above questions using publically available data from various U.S. and European government sources and associated R packages. In particular, we will explore whether homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. The question we will attempt to answer within this project is: Are demographics correlated with the prevalence of either homicide or rape? 
 
 Demographic factors we will explore and limit our analysis to are:
 
-	1. effects of Household type on Homicide and Rape across U.S. States
-	2. effects of age on homicide and rape  across U.S. States
-	3. effects of gender on homicide and rape  across U.S. States
-	4. effects of race on homicide and rape across U.S. States
-	5. effects of Education on homicide and rape across U.S. States 
-	6. effects of income on homicide and rape across U.S. States
-	7. effects of population on homicide and rape across U.S. States
+Effects of 
+	1. Household type
+	2. Age
+	3. Gender
+	4. Race
+	5. Education 
+	6. Income
+	and
+	7. Population
+on homicide and rape across U.S. States.
+
+#Approach
+
+Our research followed two different approaches. The first is a historical approach to see how thing changed over time across nations under study. The second is a comparison between state-to-state and county-to-county to see effects of demographics on crime.
 
 ##Approach #1
 Look at national data and compare it to other countries national statistics. In particular we will be exploring how demographic effects on crime within U.S. compares to other countries like Canada, UK and Germany.
 
 ##Approach #2
-looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of all the years for particular states.
+looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
 
 
-#we will be using the following libraries in our analysis:
+##we will be using the following libraries in our analysis:
 ```{r}
 library(dplyr)
 library(tidyr) 
@@ -34,13 +49,11 @@ library(ggplot2)
 library(readr)
 library(broom)
 library(knitr)
-
-
 ```
 
 
 
-#DATA COLLECTION NOTE:
+##DATA COLLECTION NOTE:
 
 Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
 
