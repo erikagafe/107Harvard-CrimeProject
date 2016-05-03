@@ -11,17 +11,17 @@ output: html_document
 
 Crime is any act that causes harm to individual(s), communities, society or state. Crime is a topic that terrorizes yet fascinates many people including all our team members. Crime stories are showcased all over media and gain much attention. Popular crime topics include murder (homicide) or rape. Our team members background includes interests in psychology, dynamics of social change and criminology. All the team members are fascinated with exploring effects of demographics on crime.
 
-Crime changes from country to country, from form to frequency. Why? What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics?
+Crime changes from state to state, from form to frequency. Why? What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics?
 
 
 
 ##OVERVIEW
-In this project, we explore the above questions using publically available data from various U.S. and European government sources and associated R packages. In particular, we will explore whether homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. The question we will attempt to answer within this project is: Are demographics correlated with the prevalence of either homicide or rape? If yes, then which ones.
+In this project, we explore the above questions using publically available data from various U.S. sources and associated R packages. In particular, we will explore whether homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. The question we will attempt to answer within this project is: Are demographics correlated with the prevalence of either homicide or rape? If yes, then which ones.
 
 
 #GOAL 
 To identify key demographic factors that predict the prevalence of homicide or rape. 
-Identify if these influences are better understood at national or state level. We will let the data guide us, our scope will be to cover UK, Canada, Germany and  USA. 
+Identify if these influences are better understood at national or state level. We will let the data guide us, our scope will be to cover all the states in USA. 
 
 Demographic factors we will explore and limit our analysis to are:
 
@@ -41,7 +41,7 @@ on homicide and rape across U.S. States.
 Our research followed two different approaches. The first is a historical approach to see how thing changed over time across nations under study. The second is a comparison between state-to-state and county-to-county to see effects of demographics on crime.
 
 ##Approach #1
-Look at national data and compare it to other countries national statistics. In particular we will be exploring how demographic effects on crime within U.S. compares to other countries like Canada, UK and Germany.
+Look at national data over time. In particular we will be exploring how demographic effects on crime within USA over time.
 
 ##Approach #2
 looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
@@ -59,7 +59,7 @@ library(knitr)
 
 
 
-####DATA COLLECTION NOTE:
+##DATA COLLECTION NOTE:
 
 Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
 
@@ -77,7 +77,7 @@ A based table is constructed from the UC census table 12s0059.xls from the U.S. 
 
 
 ###APPROACH 1: National Level
-1. we first uploaded our data files and did some cleaning of the data.
+1. we first uploaded our data files and did some cleaning of the data. (talk about all the issues we had finding the data; how our original scope was to cover all of Canada and Europe but due to inconsistencies in data and time shortage we decided to limit our scope to only USA.) Also mention here in detail all the manual data cleansing that was done and all the data prep done through R. 
 
 ```{r}
 # Starting with a base table US national population data by year from 1900
@@ -140,26 +140,31 @@ As can be seen in the tables and commentary above, while there is a considerable
 2. For a first pass, we explore the general trends for rape and homicide for the dataset we have by extracting the relevant years and converting the totals in the table to occurrances per 100,000 people to filter out the effect of general population growth and make the numbers more readable.
 
 
-#<ENTER CODE FOR A LINE GRAPH THAT LOOKS AT yearly POPULATION for all 4 NATIONS: USA, CANADA, GERMANY, UK>
-
-#<ENTER CODE FOR A LINE GRAPH THAT LOOKS AT yearly HOMICIDE for all 4 NATIONS: USA, CANADA, GERMANY, UK>
-
-#<ENTER CODE FOR A LINE GRAPH THAT LOOKS AT yearly RAPE for all 4 NATIONS: USA, CANADA, GERMANY, UK>
+#<ENTER CODE FOR A  GRAPH THAT LOOKS AT yearly POPULATION, homicide and rape rate for USA; all based on per 100K population >
 
 
-#<ENTER CODE FOR A GGPLOT2 GRAPH THAT LOOKS AT effects of demographic # vs MURDER for each country for current year> (using following sample code from assignment 1: p <- ggplot( filter(dat, year==2015), aes(x=demographic factor #, y=murder rate per 100k population))        p + geom_point( aes( color=country, size=population)) )
 
-use facet_wrap to do the above for both murder and rape for all DemoGrAPHIC factors listed below:
-	1. Household type (only list and use the percent of single family huseholds)
-	2. Age (median age)
-	3. Gender (male vs female ratio in population - if majority of male then more crime?)
-	4. Race (a particular race is more prominent in crime areas)
-	5. Education (only look at groups that are less then university degree; or and % that didnt pass highschool - prediction here is the more highschool dropouts the more crime)
-	6. Income (median income and its impacts on crime over the years)
+####<ENTER CODE FOR A GGPLOT2 GRAPH THAT LOOKS AT effects of demographic # vs MURDER for each country for current year> (using following sample code from assignment 1: p <- ggplot( filter(dat, year==2015), aes(x=demographic factor #, y=murder rate per 100k population))        p + geom_point( aes( color=country, size=population)) )
+
+####use facet_wrap to do the above for both murder and rape for all DemoGrAPHIC factors listed below:
+
+
+	####1. Household type (only list and use the percent of single family huseholds)
+
+	####2. Age (median age)
+
+	####3. Gender (male vs female ratio in population - if majority of male then more crime?)
+
+	####4. Race (a particular race is more prominent in crime areas)
+
+	####5. Education (only look at groups that are less then university degree; or and % that didnt pass highschool - prediction here is the more highschool dropouts the more crime)
+
+	####6. Income (median income and its impacts on crime over the years)
 	and
-	7. Population (prediction here is lower population means higher crime rate)
 
-#in the end you will 2 scripts one for each of the crimes; but 7 graphs per script that are facet_wrapped based on demographic data. this way we can see which factor had the most impact and on which country.
+	####7. Population (prediction here is lower population means higher crime rate)
+
+#in the end you will have 2 scripts one for each of the crimes; but 7 graphs per script that are facet_wrapped based on demographic data. this way we can see which factor had the most impact.
 
 
 example as below
@@ -177,7 +182,7 @@ usnat_sub  %>% ggplot(aes(year)) + geom_point(aes(y = murderpct, col = "Murder")
 ```
 
 
-#or ALTErNATIVELY, 
+ALTErNATIVELY, 
 #we can do a line graph of homicide and all the demographics data over the period of years to see if demographics change with the fluctuations within the crime over the years.
 
 #also do a line graph of rape and all demographics data over the period of years to see trends in the data based on crime rate fluctuations within the years (do any demographic data have a similar fluctuation or trend as crime rate; which ones). 
@@ -213,6 +218,29 @@ summary(fit)
 ```
 
 On a casual, look it seems rape is a little better fit, but while this model does suggest some correlations, it seems likely there is more to the picture that would need to be explored. Also, there is the time delay effect - that changes in the factors might not effect the murder/crime rate in the same year. 
+
+
+
+
+##Approach #2
+looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
+
+
+1. upload state wide data; explain data cleaning process both manual and R. 
+
+2. do a graph for each demographic and crime rate for ALL states for the most current year. 
+3. single out top 4 and bottom 4 states with worst crime rate and show a chart of them.
+5. show graphs using facet_wrap for top 4 states and the demographics data for current year, for over time; then for bottom 4;
+6. any correlations between the demographics for top 4 states? for bottom 4 states? do comparisons between the top 4 states to see trends. do you notice any trends between top 4 states data vs bottom 4's data in terms of which demographics jump out at you?
+
+#other questions to consider
+7. Create a smooth density estimate of the distribution of GDP per capita per day across states for the current year. When doing this we want to weigh states with larger populations more. We can do this using the “weight” argument in geom_density.
+
+8. Now do the same as 7 but compare top 4 states vs bottom 4 states separately. 
+
+9. do this over several peak years of crime and show the years within same window using faucet_wrap
+
+10.  find mean and standard deviation of top 4 states vs bottom 4 states demographic results.
 
 
 
