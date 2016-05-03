@@ -41,7 +41,7 @@ I then take selected chosen areas from different census tables to add to this na
 
 2. Households in the US. According to the census data dictionary: "A household that has at least one member of the household related to the householder by birth, marriage, or adoption is a "Family household."  Same-sex couple households are included in the family households category if there is at least one additional person related to the householder by birth or adoption.  Same-sex couple households with no relatives of the householder present are tabulated in nonfamily households.  Responses of "same-sex spouse" were edited during processing to "unmarried partner."  "Nonfamily households" consist of people living alone and households which do not have any members related to the householder."
 
-A based table is constructed from the UC census table 12s0059.xls from the U.S. Statistical Abstract 2012, which covers 1960 to 2010, and then selected householder characteristics for 2011 to 2014 are added from the ACS filess and B11001, B11001A, B11001I to create 12s0059-households.csv. (Tables can be found using American Fact Finder)
+A base table is constructed from the UC census table 12s0059.xls from the U.S. Statistical Abstract 2012, which covers 1960 to 2010, and then selected householder characteristics for 2011 to 2014 are added from the ACS files and B11001, B11001A, B11001I to create 12s0059-households.csv. (Tables can be found using American Fact Finder)
 
 3. Income. This table gives income for varous ethnic groups and males/females from 1947 to 2009 in 2009 dollars. Since, the ways that income has has been reported seems to have shifted in 2002 such that some categories like "White" have subgroups instead, some adjustments were made. The subgroups are similar, so I just averaged them back into the top line. Those distinctions aren't going to make much of a difference for a modeling the fit (or could be more fully explored later).
 
@@ -328,8 +328,12 @@ st_murder_pct <- data.frame(y,st_murder_pct)
 st_crime_means <- st_crime_means %>% left_join(st_murder_means, by = 'state')
 arrange(st_crime_means, desc(st_murder_means)) %>% kable()
 
+st_crime_means %>% ggplot(aes(st_murder_means,st_rape_means)) + geom_point()
+
 cor(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
 cor.test(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+
+
 
 ```
 
@@ -354,8 +358,18 @@ stat09 <- add_rownames(stat09,"State")
 # table showing top rape count for 2009
 arrange(stat09,desc(rpct)) %>% kable
 
+# for writing out the df that will be used in choropleth
+#stat09a <- stat09 %>% filter(State != 'District.of.Columbia')
+#write.csv(stat09a, file = "state_rape_percent_2009.csv")
+
+# acs.fetch(geography=washington, endyear = "2011", table.number="B01003")
+
+
 
 ```
+
+
+
 
 So this gives a list of the states with the highest percentage. We now need the median ages. For this, we go on to several packages that pull from the UScensus data. These are
 
@@ -378,14 +392,31 @@ For example, knowing that staes x, y, z currently have the highest forcible rape
 library(choroplethr)
 library(acs)
 library(choroplethrMaps)
+data("state.map")
 
 #Median age of Males
 #will not knit because it asks interactively for table number
 # state_choropleth_acs(tableId="B01002")
 
+# rape Pct Graphic
+df <- read.csv("state_rape_percent_2009.csv")
+state_choropleth(df, title = 'Rape Pct 2009')
 
+# median age graphic
+cf <- read.csv("Sources/state-media-age-2010.csv")
+state_choropleth(cf, title = 'Median Age 2010')
+
+#Note: You can see intuitively flipping between the maps that there could be a correspondence of age and rape pct. 
+
+# although a minor negative correlation? (rape pct down as median age up) Size of certain male age groups would be better probably
+
+qf <- left_join(df,cf, by = 'region')
+qf %>% ggplot(aes(x = value.x)) + geom_point(aes(y= value.y))
+cor.test(qf$value.x,qf$value.y)
 
 ```
+
+
 
 We could also look at this for example at the census tract level within a state or city.NOTE: Not sure about using this, but still checking it can rovide a useful view.
 
