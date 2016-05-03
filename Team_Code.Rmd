@@ -1,0 +1,423 @@
+---
+title: "Demographic effects on Crime"
+author: "Doug Walton, Sameen Awan, Erika"
+date: "April 26, 2016"
+output: html_document
+---
+
+Our project was on effects of demographics on crime.
+
+In this document, we explored using publically available data from various U.S. and European government sources and associated R packages to explore whether the rate of either homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. 
+
+Demographic factors we will explore and limit our analysis to are:
+
+	1. effects of Household type on Homicide and Rape across U.S. States
+	2. effects of age on homicide and rape  across U.S. States
+	3. effects of gender on homicide and rape  across U.S. States
+	4. effects of race on homicide and rape across U.S. States
+	5. effects of Education on homicide and rape across U.S. States 
+	6. effects of income on homicide and rape across U.S. States
+	7. effects of population on homicide and rape across U.S. States
+
+##Approach #1
+Look at national data and compare it to other countries national statistics. In particular we will be exploring how demographic effects on crime within U.S. compares to other countries like Canada, UK and Germany.
+
+##Approach #2
+looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of all the years for particular states.
+
+
+#we will be using the following libraries in our analysis:
+```{r}
+library(dplyr)
+library(tidyr) 
+library(ggplot2)
+library(readr)
+library(broom)
+library(knitr)
+
+
+```
+
+
+
+#DATA COLLECTION NOTE:
+
+Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
+
+1. us_national.csv is population by year from 1900 to 2015. initially derived from Section 1, Tables 1 & 2. Lagging zeros filled in on earlier years to make everything in consistent units (removed '000s reduction). Added years 2010 to 2015 from PEPANNRES annual estimates of population (found through American Fact Finder.)
+
+I then take selected chosen areas from different census tables to add to this national master.
+
+A based table is constructed from the UC census table 12s0059.xls from the U.S. Statistical Abstract 2012, which covers 1960 to 2010, and then selected householder characteristics for 2011 to 2014 are added from the ACS filess and B11001, B11001A, B11001I to create 12s0059-households.csv. (Tables can be found using American Fact Finder)
+
+3. Income. This table gives income for varous ethnic groups and males/females from 1947 to 2009 in 2009 dollars. Since, the ways that income has has been reported seems to have shifted in 2002 such that some categories like "White" have subgroups instead, some adjustments were made. The subgroups are similar, so I just averaged them back into the top line. Those distinctions aren't going to make much of a difference for a modeling the fit (or could be more fully explored later).
+
+4. Educational attainment. The table is constructed from 12s0230.xls as the base. It gives 1960 to 2010 for sex and ethnicity, but only high school+ and college+ were available. Later years would have to be added from ACS tables in the C15002 series, but the categorization of educational attainment is diferrent, making the matching of the numbers difficult. 
+
+5. Murder and Rape. Compiled from .... and also UCR ucr-us-murder1960-2012.csv. , ucr-us-rape1960-2012.csv
+
+
+APPROACH 1: National Level
+1. we first uploaded our data files and did some cleaning of the data.
+
+```{r}
+# Starting with a base table US national population data by year from 1900
+uspop <- read.csv("us_national.csv")
+uspop$year <- as.character(uspop$year)
+
+# Add household data and select out key types that might we worth looking at
+# years 1960 to 2014
+UShousehold <- read.csv("Sources/12s0059-households.csv")
+UShousehold$Type.of.unit <- as.character(UShousehold$Type.of.unit)
+UShousehold$Type.of.unit[3:9] <- c("Household_white","Household_black","Household_hispanic","fam_household","couple_household","male_household","fem_household")
+UShousehold_s <- UShousehold %>% slice(1:9) %>% select(-X1960) # eliminate gap
+cols <- UShousehold_s$Type.of.unit
+UShousehold_s <- as.data.frame(t(UShousehold_s[,-1]))
+colnames(UShousehold_s) <- cols
+UShousehold_s <- add_rownames(UShousehold_s, "year")
+# UShousehold$year <- as.factor(UShousehold$year)
+usnat <- uspop %>% left_join(UShousehold_s, by = 'year')
+
+# Add income data for age, sex, and major ethnic groups in 2009 dollars
+# years 1947 to 2009
+USincome <- read.csv("Sources/12s0701-median-income-2009-dollars.csv")
+USincome$X <- as.character(USincome$X)
+cols <- USincome$X
+USincome_s <- as.data.frame(t(USincome[,-1]))
+colnames(USincome_s) <- cols
+USincome_s <- add_rownames(USincome_s, "year")
+usnat <- usnat %>% left_join(USincome_s, by = 'year')
+
+# Educational attainment 1960 to 2010 for age, sex, major ethnicity
+USedu <- read.csv("Sources/12s0230-education.csv")
+USedu$year <- as.character(USedu$year)
+usnat <- usnat %>% left_join(USedu, by = 'year')
+
+# Ppulation subgroups by ethnicity and sex 2000 to 2010 
+USbasic2010 <- read.csv("Sources/US-EST00INT-ALLDATA.csv")
+USbasic2010 <- USbasic2010 %>% filter(AGE != '999' & MONTH != '4')
+USbasic2010 <- USbasic2010[,-1]
+
+USbasic2010sum <- USbasic2010 %>% group_by(YEAR) %>% summarise(tot_male = sum(TOT_MALE), tot_female = sum(TOT_FEMALE), white_male_pop = sum(WA_MALE),white_female_pop = sum(WA_FEMALE),black_male_pop = sum(BA_MALE),black_female_pop = sum(BA_FEMALE),hisp_male_pop = sum(H_MALE),hisp_female_pop = sum(H_FEMALE))
+
+
+USbasic2010sum <- rename(USbasic2010sum, year = YEAR)
+USbasic2010sum$year <- paste0("X",USbasic2010sum$year)
+usnat <- usnat %>% left_join(USbasic2010sum, by = 'year')
+
+# Adding homicide and rape data 1960 to 2012
+UScrime <- read.csv("Sources/12s0306-tot_in_thousands_ofcrimetype1980-2009.csv")
+UScrime$year <- paste0("X",UScrime$year)
+UScrime[2:6] <- UScrime[2:6] * 1000
+usnat2 <- usnat %>% left_join(UScrime, by = 'year')
+
+```
+
+As can be seen in the tables and commentary above, while there is a considerable amount of data available, compiling a longitudinal view is challenging because the data was collected in differing ways over decades, with differing assumptions and labels. Some of the data is already based on approximations by US census bureau, and to join the tables into a continous data series for decades involves further assumptions about how closely one category is like another. At a macro-level, this may not matter much for initially finding productive opportunities for research, but it is something to be kept in mind for later verification. 
+
+2. For a first pass, we explore the general trends for rape and homicide for the dataset we have by extracting the relevant years and converting the totals in the table to occurrances per 100,000 people to filter out the effect of general population growth and make the numbers more readable.
+
+```{r}
+# Making a sub table of just specific data of interest to make the data easier to manipulate and show
+# households was in 1000s, crimes in total numbers
+usnat_sub <- usnat2 %>% filter(year >= 'X1960' & year <= 'X2012') %>% mutate(murderpct = murder/residents*1000, rapepct = forcible_rape/residents*1000, housepct = (couple_household/residents)*1000) 
+
+
+# Graph of murders and rape trend over the last few decade
+usnat_sub  %>% ggplot(aes(year)) + geom_point(aes(y = murderpct, col = "Murder")) + geom_point(aes(y=rapepct, col="rape")) + labs(title="U.S. Forcible Rape and Murder Trends", y = "Rate per 1000")
+
+
+# To take a close look at the rape trend
+dat <- usnat_sub %>% select(year, rapepct,murderpct)
+dat$year <- seq(1960,2012)
+
+# fitting line to rape data using loess to see about the trend
+mod <- loess(rapepct~year, degree=2, span = 1, data=dat)
+loess_fit <- augment(mod)
+
+dat %>% ggplot(aes(year)) + geom_point(aes(y=rapepct)) + geom_line(aes(x=year, y=.fitted), data=loess_fit, color="red") + labs(title="Rape Trend - Loess")
+
+# Since we are looking for demographic factors that might suggest rape rather than murder
+# here is gap between the two
+
+dat <- dat %>% mutate(delta = rapepct - murderpct)
+dat %>% ggplot(aes(year,delta)) + geom_bar(stat = "identity") + labs(title = "Difference between Murder and Rape Rates")
+
+
+```
+
+So, taking a look at some factors that might account for it.
+
+Household composition. Next, we explore the question of whether perhaps more "broken" or non-traditional male-female households could create an increase in crime. So for an indicator, the relationship of households in couples is compared against the the homicide and rape crime rates. 
+
+```{r}
+
+# Couples over time
+usnat_sub  %>% ggplot(aes(year,housepct)) + geom_point()
+
+# more murders with more couples?
+usnat_sub %>% ggplot(aes(housepct,murderpct)) + geom_point()
+
+# usnat_sub  %>% ggplot(aes(year,rapepct)) + geom_point() + geom_point(aes(y = housepct))
+
+# probably doesn't mean anything
+cor(usnat_sub$murderpct,usnat_sub$housepct)
+cor.test(usnat_sub$murderpct,usnat_sub$housepct)
+
+
+```
+
+Moving on to take a look at some of the other factors we have. 
+
+```{r}
+# Incomes all Males vs All Females
+USincome_s  %>% ggplot(aes(year)) + geom_point(aes(y=inc_median_all_male, col="blue")) + geom_point(aes(y=inc_median_all_female, col="red")) 
+
+# Incomes males in largest ethnic groups
+USincome_s  %>% ggplot(aes(year)) + geom_point(aes(y=inc_median_white_male, col="white")) + geom_point(aes(y=inc_median_black_male, col="black")) + geom_point(aes(y=inc_median_asian_male, col="asian")) + geom_point(aes(y=inc_median_hispanic_male, col="hispanic"))
+
+
+# Educational attainment in High School and College of all males vs females
+USedu  %>% ggplot(aes(year)) + geom_point(aes(y=hs.all.male, col="All Males HS")) + geom_point(aes(y=hs.all.female, col="All Females HS")) + geom_point(aes(y=col.all.male, col="All Males College")) + geom_point(aes(y=col.all.female, col="All Females College")) + labs(title="High School and College - All Males vs All Females", y="Percent Completion")
+
+# HS attainment males by ethnicity
+USedu  %>% ggplot(aes(year)) + geom_point(aes(y=hs.white.male, col="White")) + geom_point(aes(y=hs.black.male, col="Black")) + geom_point(aes(y=hs.asian.male, col="Asian")) + geom_point(aes(y=hs.hisp.male, col="Hispanic")) + labs(title="High School - Males by Ethnicity", y="Percent Completion")
+
+# HS attainment females by ethnicity
+USedu  %>% ggplot(aes(year)) + geom_point(aes(y=hs.white.female, col="White")) + geom_point(aes(y=hs.black.female, col="Black")) + geom_point(aes(y=hs.asian.female, col="Asian")) + geom_point(aes(y=hs.hisp.female, col="Hispanic")) + labs(title="High School - Females by Ethnicity", y="Percent Completion")
+
+# College attainment males by ethnicity
+USedu  %>% ggplot(aes(year)) + geom_point(aes(y=col.white.male, col="White")) + geom_point(aes(y=col.black.male, col="Black")) + geom_point(aes(y=col.asian.male, col="Asian")) + geom_point(aes(y=col.hisp.male, col="Hispanic")) + labs(title="College - Males by Ethnicity", y="Percent Completion")
+
+# College attainment females by ethnicity
+USedu  %>% ggplot(aes(year)) + geom_point(aes(y=col.white.female, col="White")) + geom_point(aes(y=col.black.female, col="Black")) + geom_point(aes(y=col.asian.female, col="Asian")) + geom_point(aes(y=col.hisp.female, col="Hispanic")) + labs(title="College - Females by Ethnicity", y="Percent Completion")
+
+```
+
+So there are some trends we can see. Accompanying a generally lower homicide rate are generally higher educational attainment and generally lower traditional (male-female couple) households. 
+
+Is there a model of some of these key factors that would fit this? Here we take selected factors pertaining to traditional households, income, and educational attainment and try to fit a model. (glm or lm? not sure it makes a difference but maybe take a closer look)
+
+```{r}
+usnat_sub <- usnat2 %>% filter(year <= 'X2010' & year >= 'X2000') %>% mutate(murderpct = murder/(residents/100000), rapepct = forcible_rape/(residents/100000), housepct = (couple_household/residents)*1000)
+
+# here a logisic regression is fit for murder.
+fit <- usnat_sub %>% glm(murderpct ~ couple_household + inc_median_all_male + inc_median_all_female + hs.all.male + hs.all.female + col.all.male + col.all.female, data = .)
+summary(fit)
+
+# here a logisic regression is fit for rape
+fit <- usnat_sub %>% glm(rapepct ~ couple_household + inc_median_all_male + inc_median_all_female + hs.all.male + hs.all.female + col.all.male + col.all.female, data = .)
+summary(fit)
+
+```
+
+On a casual, look it seems rape is a little better fit, but while this model does suggest some correlations, it seems likely there is more to the picture that would need to be explored. Also, there is the time delay effect - that changes in the factors might not effect the murder/crime rate in the same year. 
+
+SWITCHING TO STATE LEVEL
+
+Now we can take a look how this approach fares at a state level. Using some data from the USCensus Bureau in conjunction with the FBI;s Uniform Crime Reporting database (http://www.ucrdatatool.gov/index.cfm), we can make a tidy table as follows:
+
+1. State population tables from 1960 to 2009, but 70s and 80s do not have intercensual estimates.
+2. Source: U.S. Bureau of Justice Statistics
+Covers many aspects of the justice system. The reported crimes focus on the type of vicitimization. Time period covered is about 1993 onward for types of victimization. 
+
+http://www.bjs.gov/
+
+
+```{r}
+# function to transpose years in cols to years in rows
+yeartorows <- function(tab) {
+  cols <- as.vector(tab[1])
+  tab <- tab[,-1]
+  tab <- as.data.frame(t(tab))
+  colnames(tab) <- unlist(cols)
+  tab <- add_rownames(tab, "year")
+  return(tab)
+}
+
+# State population table
+st_pop <- read.csv("Sources/12s0013-residents-state-1960-2009.csv")
+st_pop <- st_pop %>% select(-X1960)
+st_pop <- yeartorows(st_pop)
+
+
+# State rape table
+st_rape <- read.csv("Sources/ucr-us-rape-by-state1960-2012a.csv")
+st_rape$year <- as.character(st_rape$year)
+st_rape <- st_rape %>% filter(year >= 1970 & year <= 2009) %>% select(-United.States.Total)
+
+#Create a table of pct/1000 people
+y <- st_rape$year
+st_rape_y <- st_rape %>% select(-year)
+st_pop_y <- st_pop %>% select(-year) * 1000
+st_rape_pct <- st_rape_y/st_pop_y * 100000
+st_crime_means <- st_rape_pct %>% colMeans()
+st_rape_pct <- data.frame(y,st_rape_pct)
+
+#not needed?
+#st_crime_means <- add_rownames(st_rape_means, "state")
+
+arrange(st_crime_means, desc(st_rape_means)) %>% kable()
+
+
+
+# So Alaska is high. This article tries to explain it is because of remoteness
+# http://www.businessinsider.com/why-does-alaska-have-such-a-high-rate-rape-2013-9
+# but that doesn't necessarily explain Michigan
+
+
+# So have they always been high, or did others drop or what?
+
+st_rape_pct %>% ggplot(aes(x = y)) + geom_point(aes(y=Alaska, col = "Alaska"), color = "red") + geom_point(aes(y=Michigan), color="blue") + geom_point(aes(y=California)) + geom_point(aes(y=New.Mexico), color = "orange") + labs(title = " Selected High Incidence States", y = "Rape in 100K persons" )
+f
+
+# state murder table
+st_murder <-read.csv("Sources/ucr-us-murder-by-state1960-2012a.csv")
+st_murder$year <- as.character(st_murder$year)
+st_murder <- st_murder %>% filter(year >= 1970 & year <= 2009) %>% select(-United.States.Total)
+
+#Create a table of pct/1000 people for murders
+y <- st_murder$year
+st_murder_y <- st_murder %>% select(-year)
+st_pop_y <- st_pop %>% select(-year) * 1000
+st_murder_pct <- st_murder_y/st_pop_y * 100000
+st_murder_means <- st_murder_pct %>% colMeans()
+
+st_murder_means <- data.frame(st_murder_means)
+st_murder_means <- add_rownames(st_murder_means, "state")
+
+#Restore the percent table for later
+st_murder_pct <- data.frame(y,st_murder_pct)
+
+
+#join it to the rape figures and show it
+st_crime_means <- st_crime_means %>% left_join(st_murder_means, by = 'state')
+arrange(st_crime_means, desc(st_murder_means)) %>% kable()
+
+# So we can see from comparing the states with the top murder averages over the years with rapes, they don't generally correspond. 
+cor(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+cor.test(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+
+# state education table
+st_edu <-read.csv("Sources/12s0233-education-state.csv")
+st_edu$year <- as.character(st_edu$year)
+st_murder_x <- st_murder %>% select(-United.States.Total) %>% gather(key = state, value = murders,Alabama:Wyoming)
+st_murder_x <- st_murder %>% filter(year >= 1970 & year <= 2009) %>% select(-United.States.Total)
+
+# I begin thinking that maybe the differentiator is age of males in the 15 to 35 range. 
+
+
+
+
+# Save for later
+#state income table
+st_inc <-read.csv("Sources/11s0681-2011version-inc-state.csv")
+
+#state age-sex table
+st_basic <- read.csv("Sources/12s0016-age-sex-state.csv")
+
+
+# The Gathering (not used any more)
+st_murder_x <- st_murder %>% filter(year >= 1970 & year <= 2009) %>% select(-United.States.Total) %>% gather(key = state, value = murders,Alabama:Wyoming)
+
+st_rape_x <- st_rape %>% select(-United.States.Total) %>% gather(key = state, value = rapes,Alabama:Wyoming)
+```
+
+At this point, there could be a theory that the rise and fall of rape incidents may be related to the passing through of young men of the baby boom generation. 
+
+This report suggests the average age of a rapist is 31. https://rainn.org/get-information/statistics/sexual-assault-offenders
+
+While a year-to-year age data source is hard to come by, page 6 from this report from the census burea can be used to construct a high level table. 
+https://www.census.gov/prod/cen2010/briefs/c2010br-03.pdf
+
+```{r}
+# median age.
+
+# and the table of 2009 
+
+```
+
+For a quick check, we can look at the 2009 incidents of rape against the 2010 age table using the census data. 
+
+
+As check, we take a look at post 2009 data and see if it fits at all. For this, we go on to several packages that pull from the UScensus data. These are
+
+UScensus2010 
+acs
+choroplethr
+
+These will be used to drill down into state and maybe even county data. The packages enable both efficiently pulling the numbers and making interesting visuals. 
+
+For example, knowing that staes x, y, z currently have the highest forcible rape rates, we can look at some visuals of median male age and see if they correspond to higher rates.
+
+```{r}
+# install.packages("devtools")
+# inspired by - See more at: http://www.trulia.com/blog/tech/the-choroplethr-package-for-r/
+# can be installed from CRAN
+# USCensus API key needed install one time. To obtain: http://api.census.gov/data/key_signup.html to get the key
+# then api.key.install(key="592bc14cnotarealkey686552b17fda3c89dd389") (example)
+# see http://eglenn.scripts.mit.edu/citystate/wp-content/uploads/2013/06/wpid-working_with_acs_R3.pdf for acs package info.
+
+library(choroplethr)
+library(acs)
+library(choroplethrMaps)
+
+#Median age of Males
+state_choropleth_acs(tableId="B01002")
+
+2# B19301
+
+
+```
+
+
+We could also look at this for example at the census tract level within a state or city.NOTE: Not sure about using this, but still checking it can rovide a useful view.
+
+
+```{r}
+library(UScensus2010)
+library(UScensus2010tract)
+library(UScensus2010cdp)
+data("california.tract10")
+data(california.cdp10)
+names(california.tract10)
+
+# the msa level is the only one that is dem data (county level), the others are spatial data
+sfDem <- demographics(dem = c("P0010001", "H0180020"), "CA", level = "msa", msaname = "San Francisco")
+colnames(sfDem) <- c("Total Pop","Single Male Householder 15-34","Black")
+sfDem
+
+# I write this as a csv so you can see the result without using the package
+write.csv(sfDem, file = "sfDem-example.csv")
+
+# makes Choropleth map of California based on male householders in tracts
+# based on https://www.jstatsoft.org/article/view/v037i06
+choropleth(california.tract10,"H0180020",color = list(fun = "rainbow", attr = list(4)),main="2010 Male Householder 15 to 34 years",type="plot",border="transparent")
+
+
+# makes Choropleth map
+losangeles.msa <- MSA(msaname = "Los Angeles", state = "CA", level = "tract") 
+losangeles <- city(name = "los angeles", state = "ca") 
+losangeles.msa$lnden <- log(losangeles.msa$P0010001/areaPoly(losangeles.msa))
+
+
+# This one works
+choropleth(losangeles.msa, "lnden", main = "2010 US Census Tracts \n Los Angeles MSA", sub = "Log Density", type = "spplot", object = list(list("sp.polygons", losangeles, first = FALSE, col = "blue"), list("sp.text", c(-119, 33.9), "Los Angeles"))) 
+
+# this one works
+choropleth(losangeles.msa, "lnden", main = "2010 US Census Tracts \n Los Angeles MSA", sub = "Log Density", type = "spplot", object = list(list("sp.polygons", losangeles, first = FALSE, col = "blue"), list("sp.text", c(-118, 33.9), "Los Angeles")), xlim = c(-119, -117), ylim = c(33.5, 34.5))
+
+
+
+```
+
+
+SUMMARY
+This inquiry showed some of the possibilities and pitfalls in exploting demographics in the United States. While the US Census Bureau has a vast database spanning decades and centuries of data, it is not particularly homogenous and times have changed so that assumptions about what was relevant in the early 1900s are different from what is relevant today. The labels change, the years covered change, there are gaps. Table cols and rows always transposed. there are a bunch of footnotes and assumptions made, would probably need to re-examine the effect at some point
+
+This inquiry has shown examples from the national and state levels and how the data might be extracted and visualized.
+
+Although some trends and correlations were shown, it would be premature to draw man conclusions from just that. There are many confounding factors and assumptions. 
+
+
+
