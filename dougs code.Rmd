@@ -236,10 +236,11 @@ usnat_sub  %>% left_join(hist_pop, by = 'year') %>%
 ```
 
 
-SWITCHING TO STATE LEVEL
+# STATE LEVEL
 
 Now we can take a look how this approach fares at a state level. Using some data from the USCensus Bureau in conjunction with the FBI;s Uniform Crime Reporting database (http://www.ucrdatatool.gov/index.cfm), we can make a tidy table as follows:
 
+## Do the trends match the national level?
 1. State population tables from 1960 to 2009, but 70s and 80s do not have intercensual estimates.
 2. Source: U.S. Bureau of Justice Statistics
 Covers many aspects of the justice system. The reported crimes focus on the type of vicitimization. Time period covered is about 1993 onward for types of victimization. 
@@ -248,7 +249,7 @@ http://www.bjs.gov/
 
 
 ```{r}
-# function to transpose years in cols to years in rows
+# function to transpose years-in-cols to years-in-rows
 yeartorows <- function(tab) {
   cols <- as.vector(tab[1])
   tab <- tab[,-1]
@@ -285,7 +286,7 @@ arrange(st_crime_means, desc(st_rape_means)) %>% kable()
 
 ```
 
-
+We can see from this certain states are high, like Alaska and Michigan. So we can explore their specific trends.
 
 ```{r}
 # So Alaska is high. This article tries to explain it is because of remoteness
@@ -297,7 +298,13 @@ arrange(st_crime_means, desc(st_rape_means)) %>% kable()
 
 st_rape_pct %>% ggplot(aes(x = y)) + geom_point(aes(y=Alaska, col = "Alaska"), color = "red") + geom_point(aes(y=Michigan), color="blue") + geom_point(aes(y=California)) + geom_point(aes(y=New.Mexico), color = "orange") + labs(title = " Selected High Incidence States", y = "Rape in 100K persons" )
 
+```
 
+So the graph shows that some states, like California, did indeed follow the pattern of peaking in 1990, while certain states, like Alaska and New Mexico are less clear. 
+
+But, does murder rate follow the same pattern?
+
+```{r}
 # state murder table
 st_murder <-read.csv("Sources/ucr-us-murder-by-state1960-2012a.csv")
 st_murder$year <- as.character(st_murder$year)
@@ -320,26 +327,37 @@ st_murder_pct <- data.frame(y,st_murder_pct)
 #join it to the rape figures and show it
 st_crime_means <- st_crime_means %>% left_join(st_murder_means, by = 'state')
 arrange(st_crime_means, desc(st_murder_means)) %>% kable()
+
+cor(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+cor.test(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+
 ```
 
-
+So, there is some level of correlation, but it doesn't look like enough to predict it reliably.
 
 ## Correlation of State Rape Pct and Median Age for 2009
-As check, we take a look at post 2009 data and see if it fits at all. 
-
-First, we take a look at the states for 2009.
+The best would be to check  year-by-year state data, but this is not readily avaiable. But we can do a spot check of certain years of state data and see if the median age has any relationship to rape percentage. The year 2009 is available in the data. 
 
 ```{r}
-st_rape_pct_t <- st_rape_pct %>% filter(y == '2009')
-st_rape_pct_t <- as.matrix(st_rape_pct_t)
-st_rape_pct_t <- t(st_rape_pct_t)
-st_rape_pct_t <- as.data.frame(st_rape_pct_t)
-st_rape_pct_t$V1 <- as.double(st_rape_pct_t$V1)
+# create the table doing a little mechanical transpose of one column
+st_pop <- read.csv("Sources/12s0013-residents-state-1960-2009.csv")
+st_pop$State <- as.character(st_pop$State)
+st_pop <- st_pop %>% select(State,X2009)
+st_rape <- read.csv("Sources/ucr-us-rape-by-state1960-2012a.csv")
+st_rape <- st_rape %>% filter(year == 2009) %>% select(-year, -United.States.Total)
+states <- names(st_rape)
+pct <- unlist(st_rape)
+rpct <- pct/st_pop$X2009 * 100
+stat09 <- data.frame(rpct)
+stat09 <- add_rownames(stat09,"State")
+
+# table showing top rape count for 2009
+arrange(stat09,desc(rpct)) %>% kable
 
 
 ```
 
-So this gives a list of the states with the highest percentage. For this, we go on to several packages that pull from the UScensus data. These are
+So this gives a list of the states with the highest percentage. We now need the median ages. For this, we go on to several packages that pull from the UScensus data. These are
 
 UScensus2010 
 acs
