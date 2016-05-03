@@ -1,0 +1,65 @@
+---
+title: "Doug's spare code"
+author: "Doug Walton"
+date: "May 2, 2016"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+```{r}
+library(UScensus2010)
+library(UScensus2010tract)
+library(UScensus2010cdp)
+data("california.tract10")
+data(california.cdp10)
+names(california.tract10)
+
+# the msa level is the only one that is dem data (county level), the others are spatial data
+sfDem <- demographics(dem = c("P0010001", "H0180020"), "CA", level = "msa", msaname = "San Francisco")
+colnames(sfDem) <- c("Total Pop","Single Male Householder 15-34","Black")
+sfDem
+
+# I write this as a csv so you can see the result without using the package
+write.csv(sfDem, file = "sfDem-example.csv")
+
+# makes Choropleth map of California based on male householders in tracts
+# based on https://www.jstatsoft.org/article/view/v037i06
+choropleth(california.tract10,"H0180020",color = list(fun = "rainbow", attr = list(4)),main="2010 Male Householder 15 to 34 years",type="plot",border="transparent")
+
+
+# makes Choropleth map
+losangeles.msa <- MSA(msaname = "Los Angeles", state = "CA", level = "tract") 
+losangeles <- city(name = "los angeles", state = "ca") 
+losangeles.msa$lnden <- log(losangeles.msa$P0010001/areaPoly(losangeles.msa))
+
+
+# This one works
+choropleth(losangeles.msa, "lnden", main = "2010 US Census Tracts \n Los Angeles MSA", sub = "Log Density", type = "spplot", object = list(list("sp.polygons", losangeles, first = FALSE, col = "blue"), list("sp.text", c(-119, 33.9), "Los Angeles"))) 
+
+# this one works
+choropleth(losangeles.msa, "lnden", main = "2010 US Census Tracts \n Los Angeles MSA", sub = "Log Density", type = "spplot", object = list(list("sp.polygons", losangeles, first = FALSE, col = "blue"), list("sp.text", c(-118, 33.9), "Los Angeles")), xlim = c(-119, -117), ylim = c(33.5, 34.5))
+```
+
+
+
+```{r}
+# So we can see from comparing the states with the top murder averages over the years with rapes, they don't generally correspond. 
+#cor(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+#cor.test(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
+
+# state education table
+st_edu <-read.csv("Sources/12s0233-education-state.csv")
+st_edu$year <- as.character(st_edu$year)
+st_murder_x <- st_murder %>% select(-United.States.Total) %>% gather(key = state, value = murders,Alabama:Wyoming)
+st_murder_x <- st_murder %>% filter(year >= 1970 & year <= 2009) 
+
+
+# These are some other tables that could be useful for other directions of analysis
+#state income table
+st_inc <-read.csv("Sources/11s0681-2011version-inc-state.csv")
+
+#state age-sex table
+st_basic <- read.csv("Sources/12s0016-age-sex-state.csv")
+
+```
