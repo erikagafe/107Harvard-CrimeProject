@@ -5,9 +5,9 @@ date: "April 26, 2016"
 output: html_document
 ---
 
-Our project was on effects of demographics on crime.
+#Effects of Demographics on Specific Crimes
 
-In this document, we explored using publically available data from various U.S. and European government sources and associated R packages to explore whether the rate of either homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. 
+In this project, we explored using publically available data from various U.S. and European government sources and associated R packages to explore whether the rate of either homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. 
 
 Demographic factors we will explore and limit our analysis to are:
 
