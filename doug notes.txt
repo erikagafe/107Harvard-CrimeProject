@@ -12,6 +12,20 @@ sfDem-example.csv - an example output from UScensus2010 package, demographics fu
 dougs code.Rmd - r markdown for some code examples and manipulating some of the datasets
 
 FILES IN USE
+A. National
+us_national_csv - US national population numbers
+12s0059-households.csv  - US national household data
+12s0701-median-income-2009-dollars.csv 
+12s0230-education.csv
+US-EST00INT-ALLDATA.csv
+12s0306-tot_in_thousands_ofcrimetype1980-2009.csv
+
+B. State
+12s0013-residents-state-1960-2009.csv
+ucr-us-rape-by-state1960-2012a.csv
+ucr-us-murder-by-state1960-2012a.csv
+state_rape_percent_2009.csv - output from R
+
 
 
 FILES IN SOURCES

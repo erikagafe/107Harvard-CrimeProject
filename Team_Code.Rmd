@@ -228,6 +228,19 @@ looking at 2015 data for all U.S. states for all demographic data to fnd trends.
 
 1. upload state wide data; explain data cleaning process both manual and R. 
 
+
+```{r}
+# state data
+stdem <- read.csv("states-key-demographics-2012.csv")
+
+stdem %>% ggplot(aes(x = tot_pop/100000,y = State)) + geom_point()
+
+
+
+```
+
+
+
 2. do a graph for each demographic and crime rate for ALL states for the most current year. 
 3. single out top 4 and bottom 4 states with worst crime rate and show a chart of them.
 5. show graphs using facet_wrap for top 4 states and the demographics data for current year, for over time; then for bottom 4;
