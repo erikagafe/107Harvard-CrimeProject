@@ -11,6 +11,9 @@ us_national.xls  - an excel file compiled from files in sources.
 sfDem-example.csv - an example output from UScensus2010 package, demographics function
 dougs code.Rmd - r markdown for some code examples and manipulating some of the datasets
 
+FILES IN USE
+
+
 FILES IN SOURCES
 files from the Statistical Abstract of the United States: 2012
 National
