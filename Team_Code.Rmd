@@ -9,13 +9,19 @@ output: html_document
 
 ##MOTIVATION
 
-Crime is any act that causes harm to individual(s), communities, society or state. Crime is a topic that terrorizes yet fascinates many people. Crime stories are showcased all over media and gain much attention. Popular crime topics include murder (homicide) or rape. 
+Crime is any act that causes harm to individual(s), communities, society or state. Crime is a topic that terrorizes yet fascinates many people including all our team members. Crime stories are showcased all over media and gain much attention. Popular crime topics include murder (homicide) or rape. Our team members background includes interests in psychology, dynamics of social change and criminology. All the team members are fascinated with exploring effects of demographics on crime.
 
 Crime changes from country to country, from form to frequency. Why? What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics?
 
 
+
 ##OVERVIEW
-In this project, we explore the above questions using publically available data from various U.S. and European government sources and associated R packages. In particular, we will explore whether homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. The question we will attempt to answer within this project is: Are demographics correlated with the prevalence of either homicide or rape? 
+In this project, we explore the above questions using publically available data from various U.S. and European government sources and associated R packages. In particular, we will explore whether homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. The question we will attempt to answer within this project is: Are demographics correlated with the prevalence of either homicide or rape? If yes, then which ones.
+
+
+#GOAL 
+To identify key demographic factors that predict the prevalence of homicide or rape. 
+Identify if these influences are better understood at national or state level. We will let the data guide us, our scope will be to cover UK, Canada, Germany and  USA. 
 
 Demographic factors we will explore and limit our analysis to are:
 
@@ -70,7 +76,7 @@ A based table is constructed from the UC census table 12s0059.xls from the U.S. 
 5. Murder and Rape. Compiled from .... and also UCR ucr-us-murder1960-2012.csv. , ucr-us-rape1960-2012.csv
 
 
-APPROACH 1: National Level
+###APPROACH 1: National Level
 1. we first uploaded our data files and did some cleaning of the data.
 
 ```{r}
@@ -128,34 +134,47 @@ usnat2 <- usnat %>% left_join(UScrime, by = 'year')
 
 As can be seen in the tables and commentary above, while there is a considerable amount of data available, compiling a longitudinal view is challenging because the data was collected in differing ways over decades, with differing assumptions and labels. Some of the data is already based on approximations by US census bureau, and to join the tables into a continous data series for decades involves further assumptions about how closely one category is like another. At a macro-level, this may not matter much for initially finding productive opportunities for research, but it is something to be kept in mind for later verification. 
 
+
+
+#National RATE OF HOMICIDE AND RAPE
 2. For a first pass, we explore the general trends for rape and homicide for the dataset we have by extracting the relevant years and converting the totals in the table to occurrances per 100,000 people to filter out the effect of general population growth and make the numbers more readable.
 
+
+#<ENTER CODE FOR A LINE GRAPH THAT LOOKS AT yearly POPULATION for all 4 NATIONS: USA, CANADA, GERMANY, UK>
+
+#<ENTER CODE FOR A LINE GRAPH THAT LOOKS AT yearly HOMICIDE for all 4 NATIONS: USA, CANADA, GERMANY, UK>
+
+#<ENTER CODE FOR A LINE GRAPH THAT LOOKS AT yearly RAPE for all 4 NATIONS: USA, CANADA, GERMANY, UK>
+
+
+#<ENTER CODE FOR A GGPLOT2 GRAPH THAT LOOKS AT effects of demographic # vs MURDER for each country for current year> (using following sample code from assignment 1: p <- ggplot( filter(dat, year==2015), aes(x=demographic factor #, y=murder rate per 100k population))        p + geom_point( aes( color=country, size=population)) )
+
+use facet_wrap to do the above for both murder and rape for all DemoGrAPHIC factors listed below:
+	1. Household type
+	2. Age
+	3. Gender
+	4. Race
+	5. Education 
+	6. Income
+	and
+	7. Population
+
+#in the end you will 2 scripts one for each of the crimes; but 7 graphs per script that are facet_wrapped based on demographic data. this way we can see which factor had the most impact and on which country.
+
+#or we can do a line graph of homicide and all the demographics data over the period of years to see if demographics change with the fluctuations within the crime over the years.
+
+
+
+
 ```{r}
+
 # Making a sub table of just specific data of interest to make the data easier to manipulate and show
 # households was in 1000s, crimes in total numbers
 usnat_sub <- usnat2 %>% filter(year >= 'X1960' & year <= 'X2012') %>% mutate(murderpct = murder/residents*1000, rapepct = forcible_rape/residents*1000, housepct = (couple_household/residents)*1000) 
 
 
 # Graph of murders and rape trend over the last few decade
-usnat_sub  %>% ggplot(aes(year)) + geom_point(aes(y = murderpct, col = "Murder")) + geom_point(aes(y=rapepct, col="rape")) + labs(title="U.S. Forcible Rape and Murder Trends", y = "Rate per 1000")
-
-
-# To take a close look at the rape trend
-dat <- usnat_sub %>% select(year, rapepct,murderpct)
-dat$year <- seq(1960,2012)
-
-# fitting line to rape data using loess to see about the trend
-mod <- loess(rapepct~year, degree=2, span = 1, data=dat)
-loess_fit <- augment(mod)
-
-dat %>% ggplot(aes(year)) + geom_point(aes(y=rapepct)) + geom_line(aes(x=year, y=.fitted), data=loess_fit, color="red") + labs(title="Rape Trend - Loess")
-
-# Since we are looking for demographic factors that might suggest rape rather than murder
-# here is gap between the two
-
-dat <- dat %>% mutate(delta = rapepct - murderpct)
-dat %>% ggplot(aes(year,delta)) + geom_bar(stat = "identity") + labs(title = "Difference between Murder and Rape Rates")
-
+usnat_sub  %>% ggplot(aes(year)) + geom_point(aes(y = murderpct, col = "Murder")) + geom_point(aes(y=rapepct, col="rape")) + labs(title="U.S. Murder Trends", y = "Rate per 100000")
 
 ```
 
