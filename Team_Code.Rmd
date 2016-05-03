@@ -47,7 +47,7 @@ Look at national data and compare it to other countries national statistics. In 
 looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
 
 
-##we will be using the following libraries in our analysis:
+we will be using the following libraries in our analysis:
 ```{r}
 library(dplyr)
 library(tidyr) 
@@ -59,7 +59,7 @@ library(knitr)
 
 
 
-##DATA COLLECTION NOTE:
+####DATA COLLECTION NOTE:
 
 Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
 
