@@ -1,0 +1,67 @@
+---
+title: "Doug states over time"
+author: "Doug Walton"
+date: "May 4, 2016"
+output: html_document
+---
+
+
+# Do these states seem to mirror the national rape 'peak' of 1990?
+
+
+```{r}
+# function to transpose years-in-cols to years-in-rows
+yeartorows <- function(tab) {
+  cols <- as.vector(tab[1])
+  tab <- tab[,-1]
+  tab <- as.data.frame(t(tab))
+  colnames(tab) <- unlist(cols)
+  tab <- add_rownames(tab, "year")
+  return(tab)
+}
+
+# State population table
+st_pop <- read.csv("Sources/12s0013-residents-state-1960-2009.csv")
+st_pop <- st_pop %>% select(-X1960)
+st_pop <- yeartorows(st_pop)
+
+
+# State rape table
+st_rape <- read.csv("Sources/ucr-us-rape-by-state1960-2012a.csv")
+st_rape$year <- as.character(st_rape$year)
+st_rape <- st_rape %>% filter(year >= 1970 & year <= 2009) %>% select(-United.States.Total)
+
+#Create a table of of average rape percent over the last few decades as a way of identifying the 'worst'
+
+y <- st_rape$year
+st_rape_y <- st_rape %>% select(-year)
+st_pop_y <- st_pop %>% select(-year) * 1000
+st_rape_pct <- st_rape_y/st_pop_y * 100000
+st_crime_means <- st_rape_pct %>% colMeans()
+st_crime_means <- data.frame(st_crime_means)
+st_crime_means <- add_rownames(st_crime_means,"state")
+st_crime_means <- rename(st_crime_means, st_rape_means = st_crime_means)
+st_rape_pct <- data.frame(y,st_rape_pct)
+
+arrange(st_crime_means, desc(st_crime_means)) %>% kable()
+
+
+```
+
+We can see from this certain states are high, like Alaska and Michigan. So we can explore their specific trends.
+
+```{r}
+# So Alaska is high. This article tries to explain it is because of remoteness
+# http://www.businessinsider.com/why-does-alaska-have-such-a-high-rate-rape-2013-9
+# but that doesn't necessarily explain Michigan
+
+
+# So have they always been high, or did others drop or what?
+
+st_rape_pct %>% ggplot(aes(x = y)) + geom_point(aes(y=Alaska), color = "red") + geom_point(aes(y=Michigan), color="blue") + geom_point(aes(y=California)) + geom_point(aes(y=New.Mexico), color = "orange") + labs(title = " Selected High Incidence States", y = "Rape in 100K persons" )
+
+```
+
+So the graph shows that some states, like California, did indeed follow the pattern of peaking in 1990, while certain states, like Alaska and New Mexico are less clear. 
+
+
