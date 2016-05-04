@@ -234,6 +234,9 @@ looking at 2015 data for all U.S. states for all demographic data to fnd trends.
 stdem <- read.csv("states-key-demographics-2012.csv")
 
 stdem %>% ggplot(aes(x = tot_pop/100000,y = State)) + geom_point()
+stdem %>% ggplot(aes(x = num_rapes/tot_pop * 100000,y = State)) + geom_point()
+stdem %>% ggplot(aes(x = num_murder/tot_pop * 100000,y = State)) + geom_point()
+stdem %>% ggplot(aes(x = pct * 100000,y = State)) + geom_point()
 
 
 
