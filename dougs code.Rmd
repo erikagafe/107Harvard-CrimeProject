@@ -448,30 +448,30 @@ For example, knowing that staes x, y, z currently have the highest forcible rape
 # then api.key.install(key="592bc14cnotarealkey686552b17fda3c89dd389") (example)
 # see http://eglenn.scripts.mit.edu/citystate/wp-content/uploads/2013/06/wpid-working_with_acs_R3.pdf for acs package info.
 
-library(choroplethr)
-library(acs)
-library(choroplethrMaps)
-data("state.map")
+#library(choroplethr)
+#library(acs)
+#library(choroplethrMaps)
+#data("state.map")
 
 #Median age of Males
 #will not knit because it asks interactively for table number
 # state_choropleth_acs(tableId="B01002")
 
 # rape Pct Graphic
-df <- read.csv("state_rape_percent_2009.csv")
-state_choropleth(df, title = 'Rape Pct 2009')
+#df <- read.csv("state_rape_percent_2009.csv")
+#state_choropleth(df, title = 'Rape Pct 2009')
 
 # median age graphic
-cf <- read.csv("Sources/state-media-age-2010.csv")
-state_choropleth(cf, title = 'Median Age 2010')
+#cf <- read.csv("Sources/state-media-age-2010.csv")
+#state_choropleth(cf, title = 'Median Age 2010')
 
 #Note: You can see intuitively flipping between the maps that there could be a correspondence of age and rape pct. 
 
 # although a minor negative correlation? (rape pct down as median age up) Size of certain male age groups would be better probably
 
-qf <- left_join(df,cf, by = 'region')
-qf %>% ggplot(aes(x = value.x)) + geom_point(aes(y= value.y))
-cor.test(qf$value.x,qf$value.y)
+#qf <- left_join(df,cf, by = 'region')
+#qf %>% ggplot(aes(x = value.x)) + geom_point(aes(y= value.y))
+#cor.test(qf$value.x,qf$value.y)
 
 ```
 

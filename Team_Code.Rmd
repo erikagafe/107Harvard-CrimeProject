@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "Demographic effects on Crime"
 author: "Doug Walton, DureSameen Awan, Erika Garces"
@@ -258,3 +259,264 @@ stdem %>% ggplot(aes(x = tot_pop/100000,y = State)) + geom_point()
 
 
 
+=======
+---
+title: "Demographic effects on Crime"
+author: "Doug Walton, DureSameen Awan, Erika Garces"
+date: "May 4, 2016"
+output: html_document
+---
+
+#Effects of Demographics on Specific Crimes
+
+##MOTIVATION
+
+Crime is any act that causes harm to individual(s), communities, society or state. Crime is a topic that terrorizes yet fascinates many people including all our team members. Crime stories are showcased all over media and gain much attention. Popular crime topics include murder (homicide) or rape. Our team members background includes interests in psychology, dynamics of social change and criminology. All the team members are fascinated with exploring effects of demographics on crime.
+
+Crime changes from state to state, from form to frequency. Why? What are the demographic factors that make people commit a crime? Will there be any interesting relationships between crimes and demographics?
+
+
+
+##OVERVIEW
+In this project, we explore the above questions using publically available data from various U.S. sources and associated R packages. In particular, we will explore whether homicide or rape seems associated with any identifiable demographic factors. This will give insight into the research possibilities for using these datasets with this kind of social science question. The question we will attempt to answer within this project is: Are demographics correlated with the prevalence of either homicide or rape? If yes, then which ones.
+
+
+#GOAL 
+To identify key demographic factors that predict the prevalence of homicide or rape. 
+Identify if these influences are better understood at national or state level. We will let the data guide us, our scope will be to cover all the states in USA. 
+
+Demographic factors we will explore and limit our analysis to are:
+
+Effects of 
+	1. Household type
+	2. Age
+	3. Gender
+	4. Race
+	5. Education 
+	6. Income
+	and
+	7. Population
+on homicide and rape across U.S. States.
+
+#Approach
+
+Our research followed two different approaches. The first is a historical approach to see how thing changed over time across nations under study. The second is a comparison between state-to-state and county-to-county to see effects of demographics on crime.
+
+##Approach #1
+Look at national data over time. In particular we will be exploring how demographic effects on crime within USA over time.
+
+##Approach #2
+looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
+
+
+we will be using the following libraries in our analysis:
+```{r}
+suppressMessages (library(dplyr))
+library(tidyr) 
+library(ggplot2)
+library(readr)
+library(broom)
+library(knitr)
+```
+
+
+
+##DATA COLLECTION NOTE:
+
+Starting with tables derived from the 2012 Statistical Abstract of the United States http://www.census.gov/library/publications/2011/compendia/statab/131ed.html
+
+1. us_national.csv is population by year from 1900 to 2015. initially derived from Section 1, Tables 1 & 2. Lagging zeros filled in on earlier years to make everything in consistent units (removed '000s reduction). Added years 2010 to 2015 from PEPANNRES annual estimates of population (found through American Fact Finder.)
+
+I then take selected chosen areas from different census tables to add to this national master.
+
+A based table is constructed from the UC census table 12s0059.xls from the U.S. Statistical Abstract 2012, which covers 1960 to 2010, and then selected householder characteristics for 2011 to 2014 are added from the ACS filess and B11001, B11001A, B11001I to create 12s0059-households.csv. (Tables can be found using American Fact Finder)
+
+3. Income. This table gives income for varous ethnic groups and males/females from 1947 to 2009 in 2009 dollars. Since, the ways that income has has been reported seems to have shifted in 2002 such that some categories like "White" have subgroups instead, some adjustments were made. The subgroups are similar, so I just averaged them back into the top line. Those distinctions aren't going to make much of a difference for a modeling the fit (or could be more fully explored later).
+
+4. Educational attainment. The table is constructed from 12s0230.xls as the base. It gives 1960 to 2010 for sex and ethnicity, but only high school+ and college+ were available. Later years would have to be added from ACS tables in the C15002 series, but the categorization of educational attainment is diferrent, making the matching of the numbers difficult. 
+
+5. Murder and Rape. Compiled from .... and also UCR ucr-us-murder1960-2012.csv. , ucr-us-rape1960-2012.csv
+
+
+###APPROACH 1: National Level
+1. we first uploaded our data files and did some cleaning of the data. (talk about all the issues we had finding the data; how our original scope was to cover all of Canada and Europe but due to inconsistencies in data and time shortage we decided to limit our scope to only USA.) Also mention here in detail all the manual data cleansing that was done and all the data prep done through R. 
+
+```{r}
+# Starting with a base table US national population data by year from 1900
+uspop <- read.csv("us_national.csv")
+uspop$year <- as.character(uspop$year)
+
+# Add household data and select out key types that might we worth looking at
+# years 1960 to 2014
+UShousehold <- read.csv("Sources/12s0059-households.csv")
+UShousehold$Type.of.unit <- as.character(UShousehold$Type.of.unit)
+UShousehold$Type.of.unit[3:9] <- c("Household_white","Household_black","Household_hispanic","fam_household","couple_household","male_household","fem_household")
+UShousehold_s <- UShousehold %>% slice(1:9) %>% select(-X1960) # eliminate gap
+cols <- UShousehold_s$Type.of.unit
+UShousehold_s <- as.data.frame(t(UShousehold_s[,-1]))
+colnames(UShousehold_s) <- cols
+UShousehold_s <- add_rownames(UShousehold_s, "year")
+# UShousehold$year <- as.factor(UShousehold$year)
+usnat <- uspop %>% left_join(UShousehold_s, by = 'year')
+
+# Add income data for age, sex, and major ethnic groups in 2009 dollars
+# years 1947 to 2009
+USincome <- read.csv("Sources/12s0701-median-income-2009-dollars.csv")
+USincome$X <- as.character(USincome$X)
+cols <- USincome$X
+USincome_s <- as.data.frame(t(USincome[,-1]))
+colnames(USincome_s) <- cols
+USincome_s <- add_rownames(USincome_s, "year")
+usnat <- usnat %>% left_join(USincome_s, by = 'year')
+
+# Educational attainment 1960 to 2010 for age, sex, major ethnicity
+USedu <- read.csv("Sources/12s0230-education.csv")
+USedu$year <- as.character(USedu$year)
+usnat <- usnat %>% left_join(USedu, by = 'year')
+
+# Ppulation subgroups by ethnicity and sex 2000 to 2010 
+USbasic2010 <- read.csv("Sources/US-EST00INT-ALLDATA.csv")
+USbasic2010 <- USbasic2010 %>% filter(AGE != '999' & MONTH != '4')
+USbasic2010 <- USbasic2010[,-1]
+
+USbasic2010sum <- USbasic2010 %>% group_by(YEAR) %>% summarise(tot_male = sum(TOT_MALE), tot_female = sum(TOT_FEMALE), white_male_pop = sum(WA_MALE),white_female_pop = sum(WA_FEMALE),black_male_pop = sum(BA_MALE),black_female_pop = sum(BA_FEMALE),hisp_male_pop = sum(H_MALE),hisp_female_pop = sum(H_FEMALE))
+
+
+USbasic2010sum <- rename(USbasic2010sum, year = YEAR)
+USbasic2010sum$year <- paste0("X",USbasic2010sum$year)
+usnat <- usnat %>% left_join(USbasic2010sum, by = 'year')
+
+# Adding homicide and rape data 1960 to 2012
+UScrime <- read.csv("Sources/12s0306-tot_in_thousands_ofcrimetype1980-2009.csv")
+UScrime$year <- paste0("X",UScrime$year)
+UScrime[2:6] <- UScrime[2:6] * 1000
+usnat2 <- usnat %>% left_join(UScrime, by = 'year')
+
+```
+
+As can be seen in the tables and commentary above, while there is a considerable amount of data available, compiling a longitudinal view is challenging because the data was collected in differing ways over decades, with differing assumptions and labels. Some of the data is already based on approximations by US census bureau, and to join the tables into a continous data series for decades involves further assumptions about how closely one category is like another. At a macro-level, this may not matter much for initially finding productive opportunities for research, but it is something to be kept in mind for later verification. 
+
+
+
+#National RATE OF HOMICIDE AND RAPE
+2. For a first pass, we explore the general trends for rape and homicide for the dataset we have by extracting the relevant years and converting the totals in the table to occurrances per 100,000 people to filter out the effect of general population growth and make the numbers more readable.
+
+
+#<ENTER CODE FOR A  GRAPH THAT LOOKS AT yearly POPULATION, homicide and rape rate for USA; all based on per 100K population >
+
+
+
+####<ENTER CODE FOR A GGPLOT2 GRAPH THAT LOOKS AT effects of demographic # vs MURDER for each country for current year> (using following sample code from assignment 1: p <- ggplot( filter(dat, year==2015), aes(x=demographic factor #, y=murder rate per 100k population))        p + geom_point( aes( color=country, size=population)) )
+
+####use facet_wrap to do the above for both murder and rape for all DemoGrAPHIC factors listed below:
+
+
+	####1. Household type (only list and use the percent of single family huseholds)
+
+	####2. Age (median age)
+
+	####3. Gender (male vs female ratio in population - if majority of male then more crime?)
+
+	####4. Race (a particular race is more prominent in crime areas)
+
+	####5. Education (only look at groups that are less then university degree; or and % that didnt pass highschool - prediction here is the more highschool dropouts the more crime)
+
+	####6. Income (median income and its impacts on crime over the years)
+	and
+
+	####7. Population (prediction here is lower population means higher crime rate)
+
+#in the end you will have 2 scripts one for each of the crimes; but 7 graphs per script that are facet_wrapped based on demographic data. this way we can see which factor had the most impact.
+
+
+example as below
+
+```{r}
+
+# Making a sub table of just specific data of interest to make the data easier to manipulate and show
+# households was in 1000s, crimes in total numbers
+usnat_sub <- usnat2 %>% filter(year >= 'X1960' & year <= 'X2012') %>% mutate(murderpct = murder/residents*1000, rapepct = forcible_rape/residents*1000, housepct = (couple_household/residents)*1000) 
+
+
+# Graph of murders and rape trend over the last few decade
+usnat_sub  %>% ggplot(aes(year)) + geom_point(aes(y = murderpct, col = "Murder")) + geom_point(aes(y=housepct, col="couples")) + geom_point(aes(y=inc_median_all_male/10000, col="income")) + labs(title="U.S. Murder Trends", y = "Rate per 100000")
+
+```
+
+
+ALTErNATIVELY, 
+#we can do a line graph of homicide and all the demographics data over the period of years to see if demographics change with the fluctuations within the crime over the years.
+
+#also do a line graph of rape and all demographics data over the period of years to see trends in the data based on crime rate fluctuations within the years (do any demographic data have a similar fluctuation or trend as crime rate; which ones). 
+
+#state your findings in word at the end
+
+DO SOME CORRELATIONS and 
+
+```{r}
+
+# probably doesn't mean anything
+cor(usnat_sub$murderpct,usnat_sub$housepct)
+cor.test(usnat_sub$murderpct,usnat_sub$housepct)
+
+
+```
+
+So there are some trends we can see. Accompanying a generally lower homicide rate are generally higher educational attainment and generally lower traditional (male-female couple) households. 
+
+Is there a model of some of these key factors that would fit this? Here we take selected factors pertaining to traditional households, income, and educational attainment and try to fit a model. (glm or lm? not sure it makes a difference but maybe take a closer look)
+
+```{r}
+usnat_sub <- usnat2 %>% filter(year <= 'X2010' & year >= 'X2000') %>% mutate(murderpct = murder/(residents/100000), rapepct = forcible_rape/(residents/100000), housepct = (couple_household/residents)*1000)
+
+# here a logisic regression is fit for murder.
+fit <- usnat_sub %>% glm(murderpct ~ couple_household + inc_median_all_male + inc_median_all_female + hs.all.male + hs.all.female + col.all.male + col.all.female, data = .)
+summary(fit)
+
+# here a logisic regression is fit for rape
+fit <- usnat_sub %>% glm(rapepct ~ couple_household + inc_median_all_male + inc_median_all_female + hs.all.male + hs.all.female + col.all.male + col.all.female, data = .)
+summary(fit)
+
+```
+
+On a casual, look it seems rape is a little better fit, but while this model does suggest some correlations, it seems likely there is more to the picture that would need to be explored. Also, there is the time delay effect - that changes in the factors might not effect the murder/crime rate in the same year. 
+
+
+
+
+##Approach #2
+looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
+
+
+1. upload state wide data; explain data cleaning process both manual and R. 
+
+
+```{r}
+# state data
+stdem <- read.csv("states-key-demographics-2012.csv")
+
+stdem %>% ggplot(aes(x = tot_pop/100000,y = State)) + geom_point()
+
+
+
+```
+
+
+
+2. do a graph for each demographic and crime rate for ALL states for the most current year. 
+3. single out top 4 and bottom 4 states with worst crime rate and show a chart of them.
+5. show graphs using facet_wrap for top 4 states and the demographics data for current year, for over time; then for bottom 4;
+6. any correlations between the demographics for top 4 states? for bottom 4 states? do comparisons between the top 4 states to see trends. do you notice any trends between top 4 states data vs bottom 4's data in terms of which demographics jump out at you?
+
+#other questions to consider
+7. Create a smooth density estimate of the distribution of GDP per capita per day across states for the current year. When doing this we want to weigh states with larger populations more. We can do this using the “weight” argument in geom_density.
+
+8. Now do the same as 7 but compare top 4 states vs bottom 4 states separately. 
+
+9. do this over several peak years of crime and show the years within same window using faucet_wrap
+
+10.  find mean and standard deviation of top 4 states vs bottom 4 states demographic results.
+
+
+
+>>>>>>> 36f3a6b338b02a076b12bc42a1254afc3fcd165b
