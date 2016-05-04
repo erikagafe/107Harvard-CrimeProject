@@ -166,8 +166,7 @@ dat %>% ggplot(aes(year1)) + geom_point(aes(y=murderpct)) + geom_line(aes(x=year
 
 ```
 
-	1. Household type 
-	
+1. Household type 
 	
 ```{r}
 
@@ -187,16 +186,30 @@ ggplot(ushousehold, aes(x=housepct, y=murderpct)) + geom_point( aes(color=year1 
 
 ```
 
-	####2. Age (median age)
+2. Age (median age)
+	
+Data gotten from [US census Bureau](https://www.census.gov/prod/cen2010/briefs/c2010br-03.pdf)
+
 	
 ```{r}
 
+year1 <- seq(1960,2010, 10)
+under18 <- c(24.0,25.7,25.6,28.1,34.3,35.9)
+under44 <- c(36.5,39.9,43.2,40.9,35.3,34.8)
+over65 <- c(26.4,22.0,18.6,19.6,20.6,20.3)
+hist_pop <- data.frame(year1,under18,under44,over65)
+#hist_pop$year1 <- as.character(hist_pop$year1)
+kable(hist_pop)
 
+## Plotting it against the rape curve
+age<-ushousehold%>% left_join(hist_pop) 
+
+age%>%ggplot(aes(year1)) + geom_point(aes(y=under44, color = "% Median Age"))  + geom_point(aes(y=under18, color = "% Under 18"))  +  geom_point(aes(y=over65, color = " % Over 65"))  +
+geom_point(aes(y=murderpct, color = " % Murder"))+ geom_point(aes(y = rapepct,color=" % Rape ")) +labs(title="Rape and Murder vs Age", y = "Rate per 100000")
 
 ```
 
-	####3. Gender (male vs female ratio in population - if majority of male then more crime?)
-
+3. Gender (male vs female ratio in population - if majority of male then more crime?)
 
 ```{r}
 y<-ushousehold%>%select(tot_male, residents,year1)%>% mutate(total = tot_male/residents*10000)%>% filter(year1>=2000)%>%mutate(key="tot_male")
@@ -227,7 +240,7 @@ ushousehold%>% mutate(total1 = tot_female/residents*10000)%>% mutate(total = tot
 # ushousehold  %>% ggplot(aes(year1, residents))+ geom_point(aes(y=forcible_rape, col="forcible_rape")) + geom_point(aes(y=tot_male, col="male")) +geom_point(aes(y=murder, col="murder")) + geom_point(aes(y=tot_female, col="female")) + labs(title="U.S. Rape Trends vs Gender", y = "Rate per 100000", x= "year", col="values")
 ```
 
-	####4. Race (a particular race is more prominent in crime areas)
+4. Race (a particular race is more prominent in crime areas)
 
 ```{r}
 
@@ -236,7 +249,7 @@ ushousehold%>% mutate(total1 = tot_female/residents*10000)%>% mutate(total = tot
 
 ```
 
-	####5. Education (only look at groups that are less then university degree; or and % that didnt pass highschool - prediction here is the more highschool dropouts the more crime)
+5. Education (only look at groups that are less then university degree; or and % that didnt pass highschool - prediction here is the more highschool dropouts the more crime)
 	
 ```{r}
 
@@ -255,8 +268,7 @@ ggplot(Edu, aes(murderpct)) + geom_point(aes(y=hs,  col='All HS'))+ geom_point(a
 
 ```
 
-	####6. Income (median income and its impacts on crime over the years)
-	and
+6. Income (median income and its impacts on crime over the years)
 
 ```{r}
 ushousehold%>% ggplot(aes(year1)) + geom_point(aes(y=inc_median_all_male, col="Male")) + geom_point(aes(y=inc_median_all_female, col="Female"))+labs(title="U.S. Income Men vs Female", y = "Rate per 100000", x= "year", col="values")
@@ -270,9 +282,7 @@ ggplot(income, aes(x=total_income, y=rapepct)) + geom_point( aes(color=year1 , s
 ```
 
 
-
 7. Population (prediction here is lower population means higher crime rate)
-	
 	
 ```{r}
 ushousehold %>% ggplot(aes(year1))+ geom_point(aes(y=forcible_rape, col="forcible_rape")) +geom_point(aes(y=murder, col="murder")) + geom_point(aes(y=residents/1000, col="population")) + labs(title="U.S. Population, Rape and Homocide", y = "Rate per 100000", x= "year", col="values")
@@ -290,7 +300,7 @@ usnat_sub <- usnat2 %>% filter(year >= 'X1960' & year <= 'X2012') %>% mutate(mur
 
 
 # Graph of murders and rape trend over the last few decade
-usnat_sub  %>% ggplot(aes(year))  + geom_point(aes(y=housepct, col="couples")) + geom_point(aes(y=inc_median_all_male/10000, col="income")) + geom_point(aes(y = murderpct, col = "Murder"))+ labs(title="U.S. Murder Trends", y = "Rate per 100000", col="values")
+#usnat_sub  %>% ggplot(aes(year))  + geom_point(aes(y=housepct, col="couples")) + geom_point(aes(y=inc_median_all_male/10000, col="income")) + geom_point(aes(y = murderpct, col = "Murder"))+ labs(title="U.S. Murder Trends", y = "Rate per 100000", col="values")
 
 ```
 

@@ -388,6 +388,7 @@ usnat <- usnat %>% left_join(USbasic2010sum, by = 'year')
 
 # Adding homicide and rape data 1960 to 2012
 UScrime <- read.csv("Sources/12s0306-tot_in_thousands_ofcrimetype1980-2009.csv")
+UScrime<- UScrime %>% mutate (year1= year)
 UScrime$year <- paste0("X",UScrime$year)
 UScrime[2:6] <- UScrime[2:6] * 1000
 usnat2 <- usnat %>% left_join(UScrime, by = 'year')
