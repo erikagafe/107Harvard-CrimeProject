@@ -29,7 +29,7 @@ st_pop <- yeartorows(st_pop)
 # State rape table
 st_rape <- read.csv("Sources/ucr-us-rape-by-state1960-2012a.csv")
 st_rape$year <- as.character(st_rape$year)
-st_rape <- st_rape %>% filter(year >= 1970 & year <= 2009) %>% select(-United.States.Total)
+st_rape <- st_rape %>% filter(year >= 1970 & year <= 2009) %>% arrange(year) %>% select(-United.States.Total)
 
 #Create a table of of average rape percent over the last few decades as a way of identifying the 'worst'
 
@@ -40,7 +40,7 @@ st_rape_pct <- st_rape_y/st_pop_y * 100000
 st_crime_means <- st_rape_pct %>% colMeans()
 st_crime_means <- data.frame(st_crime_means)
 st_crime_means <- add_rownames(st_crime_means,"state")
-st_crime_means <- rename(st_crime_means, st_rape_means = st_crime_means)
+# st_crime_means <- rename(st_crime_means, st_rape_means = st_crime_means)
 st_rape_pct <- data.frame(y,st_rape_pct)
 
 arrange(st_crime_means, desc(st_crime_means)) %>% kable()
@@ -56,9 +56,16 @@ We can see from this certain states are high, like Alaska and Michigan. So we ca
 # but that doesn't necessarily explain Michigan
 
 
-# So have they always been high, or did others drop or what?
+# So have the highest averages aleays been high, or did others drop or what?
+# I attempt to 'tidy' it up and maybe use that to make a better plot
+st_rape2 <- st_rape_pct
+st_rape2$y <- as.character(st_rape2$y)
+st_rape_tidy <- st_rape2 %>% select(Alabama:California) %>% gather(key = variable, value = Alabama:California, convert = TRUE)
+# but it has invalid column error - why?
 
-st_rape_pct %>% ggplot(aes(x = y)) + geom_point(aes(y=Alaska), color = "red") + geom_point(aes(y=Michigan), color="blue") + geom_point(aes(y=California)) + geom_point(aes(y=New.Mexico), color = "orange") + labs(title = " Selected High Incidence States", y = "Rape in 100K persons" )
+
+# working but could be improved
+st_rape_pct %>% ggplot(aes(x = y)) + geom_point(aes(y=Alaska), color = "red") + geom_point(aes(y=Michigan), color="blue") + geom_point(aes(y=California)) + geom_point(aes(y=New.Mexico), color = "orange") + labs(title = "Selected Historically High Incidence States", y = "Rape in 100K persons", x = "Years" )
 
 ```
 
