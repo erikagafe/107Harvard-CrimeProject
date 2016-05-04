@@ -392,7 +392,7 @@ stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_white)) + geom_bar(pos
 
 
 
-stdem %>% ggplot(aes(x = pct * 100000,y = State)) + geom_point()
+#stdem %>% ggplot(aes(x = pct * 100000,y = State)) + geom_point()
 
 
 

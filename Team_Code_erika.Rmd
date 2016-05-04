@@ -142,10 +142,27 @@ As can be seen in the tables and commentary above, while there is a considerable
 
 
 ```{r}
-rap_hom <- usnat2 %>% filter(year1 >= '1960' & year1 <= '2012')%>% mutate(murderpct = murder/residents*1000, rapepct = forcible_rape/residents*1000)
+rap_hom <- usnat2 %>% filter(year1 >= '1960' & year1 <= '2012')%>% mutate(murderpct = murder/residents*10000, rapepct = forcible_rape/residents*10000)
 
 # Graph of murders and rape trend over the last few decade
 rap_hom  %>% ggplot(aes(year1)) + geom_point(aes(y = murderpct, col = "Murder")) + geom_point(aes(y=rapepct, col="Rape")) + labs(title="U.S. Forcible Rape and Murder Trends", y = "Rate per 100000", col="Values")
+
+# To take a close look at the rape trend
+dat <- rap_hom %>% select(year, rapepct,murderpct)
+dat$year1 <- seq(1960,2012)
+
+# fitting line to rape data using loess to see about the trend
+mod <- loess(rapepct~year1, degree=2, span = 1, data=dat)
+loess_fit <- augment(mod)
+
+dat %>% ggplot(aes(year1)) + geom_point(aes(y=rapepct)) + geom_line(aes(x=year1, y=.fitted), data=loess_fit, color="red") + labs(title="Rape Trend - Loess")
+
+
+# fitting line to murderpct data using loess to see about the trend
+mod <- loess(murderpct~year1, degree=2, span = 1, data=dat)
+loess_fit <- augment(mod)
+
+dat %>% ggplot(aes(year1)) + geom_point(aes(y=murderpct)) + geom_line(aes(x=year1, y=.fitted), data=loess_fit, color="red") + labs(title="Murderpct Trend - Loess")
 
 ```
 
@@ -155,14 +172,14 @@ rap_hom  %>% ggplot(aes(year1)) + geom_point(aes(y = murderpct, col = "Murder"))
 ```{r}
 
 #The graphs below only takes into account single households, male and female.
-ushousehold <- rap_hom %>% mutate (single_householdpct =((male_household + fem_household)/residents)*1000)
+ushousehold <- rap_hom %>% mutate (single_householdpct =((male_household + fem_household)/residents)*10000)
 
 ggplot(ushousehold, aes(x=single_householdpct, y=rapepct)) + geom_point( aes(color=year1 , size=residents))+labs(title="U.S. Rape Trends in single household", y = "Rape percentage")
 
 ggplot(ushousehold, aes(x=single_householdpct, y=murderpct)) + geom_point( aes(color=year1 , size=residents)) +labs(title="U.S. Murder Trends in single household", y = "Murder percentage")
 
 #The graphs below only takes into account couple households, male and female.
-ushousehold <- ushousehold %>% mutate(housepct = (couple_household/residents)*1000) 
+ushousehold <- ushousehold %>% mutate(housepct = (couple_household/residents)*10000) 
 
 ggplot(ushousehold, aes(x=housepct, y=rapepct)) + geom_point( aes(color=year1 , size=residents)) +labs(title="U.S. Rape Trends in Couple household", y = "Rape percentage")
 
@@ -182,16 +199,26 @@ ggplot(ushousehold, aes(x=housepct, y=murderpct)) + geom_point( aes(color=year1 
 
 
 ```{r}
-
-y<-ushousehold%>%select(tot_male, residents,year1)%>% mutate(total = (tot_male/residents)*100)%>% filter(year1>=2000)%>%mutate(key="tot_male")
-x<-ushousehold%>%select(tot_female,residents,year1)%>% mutate(total = tot_female/residents*100)%>% filter(year1>=2000)%>%mutate(key="tot_female")
+y<-ushousehold%>%select(tot_male, residents,year1)%>% mutate(total = tot_male/residents*10000)%>% filter(year1>=2000)%>%mutate(key="tot_male")
+x<-ushousehold%>%select(tot_female,residents,year1)%>% mutate(total = tot_female/residents*10000)%>% filter(year1>=2000)%>%mutate(key="tot_female")
 m<-ushousehold%>%filter(year1>=2000)%>%select(murderpct,rapepct,year1)
 
 xy<-full_join(y,x)
 xy<-full_join(xy,m)
 
-ggplot(xy, aes(year1,total,group=key,color=key, col=key))  + geom_point(aes(y=murderpct)) 
-ggplot(xy, aes(year1,group=key,col=key))  + geom_point(aes(y=murderpct))+ geom_point(aes(y=total))+  geom_point(aes(y=rapepct, color= 'red')) +labs(title="U.S. Gender Trends vs murder", y = "Rate per 100000", x= "year")
+ggplot(xy, aes(year1,total,group=key,color=key, col=key)) + geom_point(aes(y=murderpct)) 
+
+ggplot(xy, aes(year1,group=key,col=key))+ geom_point(aes(y=total))+  geom_point(aes(y=rapepct, color= 'Rape')) +labs(title="U.S. Gender Trends vs murder", y = "Rate per 100000", x= "year")
+
+ushousehold%>% mutate(total = tot_male/residents*10000)%>%filter(year1>=2000)%>%ggplot(aes(total, murderpct)) + geom_point(aes(color=year1, size=residents))+labs(title="U.S. Gender Trends vs murder", x = "Male Rate per 100000", y= "Murder percentage")
+
+ushousehold%>% mutate(total = tot_female/residents*10000)%>%filter(year1>=2000)%>%ggplot(aes(total, murderpct)) + geom_point(aes(color=year1, size=residents))+labs(title="U.S. Gender Trends vs murder", x = "Female Rate per 100000", y= "Murder percentage")
+
+
+ushousehold%>% mutate(total1 = tot_female/residents*10000)%>% mutate(total = tot_male/residents*10000)%>%filter(year1>=2000)%>%ggplot(aes(y=murderpct)) + geom_point(aes(x=total1, col="female"))+ geom_point(aes(x=total, col="male"))+labs(title="U.S. Gender Trends vs murder", x = "Rate per 100000", y= "Murder percentage")
+
+ushousehold%>% mutate(total1 = tot_female/residents*10000)%>% mutate(total = tot_male/residents*10000)%>%filter(year1>=2000)%>%ggplot(aes(y=rapepct)) + geom_point(aes(x=total1, col="female"))+ geom_point(aes(x=total, col="male"))+labs(title="U.S. Gender Trends vs Rape", x = "Rate per 100000", y= "Rape percentage")
+
 
 # Graph of murders and rape trend over the last few decade
  ushousehold%>%filter(year1>=2000)%>% ggplot(aes(year1))+ geom_point(aes(y=murderpct, col="murder")) + geom_point(aes(y=tot_male, col="male")) + geom_point(aes(y=tot_female, col="female")) + labs(title="U.S. Murder Trends vs Gender", y = "Rate per 100000", x= "year", col="values")
@@ -204,26 +231,42 @@ ggplot(xy, aes(year1,group=key,col=key))  + geom_point(aes(y=murderpct))+ geom_p
 
 ```{r}
 
-##ggplot(ushousehold, aes(x=single_household, y=murder)) + geom_point( aes(color=year1 , size=residents)) 
 
-
-##race <- c("white_male_pop", "white_female_pop", "black_male_pop", "black_female_pop", "his_male_pop", "his_female_pop")
-
-
-
-##p <- ggplot( filter(ushosehold, year1>=1988), aes(x=year1, y=murder))
-##p + geom_point(aes( color=race, size=residents)) 
 
 
 ```
 
 	####5. Education (only look at groups that are less then university degree; or and % that didnt pass highschool - prediction here is the more highschool dropouts the more crime)
+	
+```{r}
+
+Edu <- rap_hom%>%mutate(hs=(hs.all.male+ hs.all.female)/2)%>%mutate(coll=(col.all.male+ col.all.female)/2)%>%filter(coll!=is.nan(coll))
+ 
+Edu  %>% ggplot(aes(year1)) + geom_point(aes(y=hs.all.male, col="All Males HS")) + geom_point(aes(y=hs.all.female, col="All Females HS")) + geom_point(aes(y=col.all.male, col="All Males College")) + geom_point(aes(y=col.all.female, col="All Females College")) + labs(title="High School and College - All Males vs All Females", y="Percent Completion", col="Education", x= "year")
+
+ggplot(Edu, aes(x=hs, y=murderpct)) + geom_point( aes(color=year1 , size=residents)) +labs(title="U.S. Murder Trends in Highschool percentage completition", y = "Murder percentage")
+
+ggplot(Edu, aes(x=hs, y=rapepct)) + geom_point( aes(color=year1 , size=residents)) +labs(title="U.S. Rape Trends in Highschool percentage completition", y = "Rape percentage") 
+
+ggplot(Edu, aes(rapepct)) + geom_point(aes(y=hs,  col='All  HS'))+ geom_point(aes(y=coll,  col="All College")) +labs(title="U.S. Rape Trends in Highschool percentage completition", y = "Education") 
+
+ggplot(Edu, aes(murderpct)) + geom_point(aes(y=hs,  col='All HS'))+ geom_point(aes(y=coll,  col="All College")) +labs(title="U.S. Murder Trends in Highschool percentage completition", y = "Education", x= "Murder Percantage") 
+
+
+```
 
 	####6. Income (median income and its impacts on crime over the years)
 	and
 
 ```{r}
 ushousehold%>% ggplot(aes(year1)) + geom_point(aes(y=inc_median_all_male, col="Male")) + geom_point(aes(y=inc_median_all_female, col="Female"))+labs(title="U.S. Income Men vs Female", y = "Rate per 100000", x= "year", col="values")
+ 
+income<-rap_hom%>%filter(year1<=2009)%>%mutate(total_income=(inc_median_all_male+inc_median_all_female)/2)
+ 
+ggplot(income, aes(x=total_income, y=murderpct)) + geom_point( aes(color=year1 , size=residents)) +labs(title="U.S. Murder Trends in total median income", y = "Murder percentage")
+
+ggplot(income, aes(x=total_income, y=rapepct)) + geom_point( aes(color=year1 , size=residents))+labs(title="U.S. Rape Trends in total median income", y = "Rape percentage")
+
 ```
 
 
@@ -234,9 +277,6 @@ ushousehold%>% ggplot(aes(year1)) + geom_point(aes(y=inc_median_all_male, col="M
 ```{r}
 ushousehold %>% ggplot(aes(year1))+ geom_point(aes(y=forcible_rape, col="forcible_rape")) +geom_point(aes(y=murder, col="murder")) + geom_point(aes(y=residents/1000, col="population")) + labs(title="U.S. Population, Rape and Homocide", y = "Rate per 100000", x= "year", col="values")
 ```
-
-#in the end you will have 2 scripts one for each of the crimes; but 7 graphs per script that are facet_wrapped based on demographic data. this way we can see which factor had the most impact.
-
 
 
 
