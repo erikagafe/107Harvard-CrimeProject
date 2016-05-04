@@ -176,7 +176,7 @@ dat %>% ggplot(aes(year1)) + geom_point(aes(y=murderpct)) + geom_line(aes(x=year
 #The graphs below only takes into account single households, male and female.
 ushousehold <- rap_hom %>% mutate (single_householdpct =((male_household + fem_household)/residents)*100000)%>% mutate(housepct = (couple_household/residents)*100000) 
 
-ushousehold%>%filter(year1>=1970)%>%ggplot(aes(year1)) +geom_point( aes(y=housepct, color = "%couples households")) + geom_point(aes(y=rapepct, color = "%Rape")) +geom_point( aes(y=murderpct, color = "% Murder"))  +labs(title="Rape and Murder vs Couple households", y = "Rate per 100k", col="Values", x="year")
+#ushousehold%>%filter(year1>=1970)%>%ggplot(aes(year1)) +geom_point( aes(y=housepct, color = "%couples households")) + geom_point(aes(y=rapepct, color = "%Rape")) +geom_point( aes(y=murderpct, color = "% Murder"))  +labs(title="Rape and Murder vs Couple households", y = "Rate per 100k", col="Values", x="year")
 
 ushousehold%>%filter(year1>=1970)%>%ggplot(aes(year1)) + geom_point( aes(y=single_householdpct, color = " % single_household"))+ geom_point(aes(y=rapepct, color = "%Rape")) +geom_point( aes(y=murderpct, color = "% Murder"))  +labs(title="Rape and Murder vs Single households", y = "Rate per 100k", col="Values", x="year")
 
@@ -272,7 +272,7 @@ race%>%ggplot(aes(year1)) + geom_point(aes(y=white_pop, col="White Population"))
 
 Edu <- rap_hom%>%mutate(hs=(hs.all.male+ hs.all.female)/2)%>%mutate(coll=(col.all.male+ col.all.female)/2)%>%filter(coll!=is.nan(coll))
  
-Edu  %>% ggplot(aes(year1)) + geom_point(aes(y=hs.all.male, col="All Males HS")) + geom_point(aes(y=hs.all.female, col="All Females HS")) + geom_point(aes(y=col.all.male, col="All Males College")) + geom_point(aes(y=col.all.female, col="All Females College")) + labs(title="High School and College - All Males vs All Females", y="Percent Completion", col="Education", x= "year")
+#Edu  %>% ggplot(aes(year1)) + geom_point(aes(y=hs.all.male, col="All Males HS")) + geom_point(aes(y=hs.all.female, col="All Females HS")) + geom_point(aes(y=col.all.male, col="All Males College")) + geom_point(aes(y=col.all.female, col="All Females College")) + labs(title="High School and College - All Males vs All Females", y="Percent Completion", col="Education", x= "year")
 
 
 Edu%>% filter(year1>=1960 & year1<=1990)%>% ggplot(aes(year1)) + geom_point(aes(y=hs,  col='All HS')) +geom_point(aes(y=murderpct, color = " % Murder"))+ geom_point(aes(y = rapepct,color=" % Rape "))+ labs(title="Rape and Murder vs High School from 1960 to 1990", y="Percentage", col="Values", x= "year")
