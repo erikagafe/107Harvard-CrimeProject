@@ -85,7 +85,7 @@ state_choropleth(sf, title = '2012 U.S State Population')
 ```{r}
 
 # Alernative view of population by state - graph view
-stbypop <- stdem %>% arrange(desc(tot_pop)) 
+stbypop <- stdem %>% arrange(tot_pop) 
 stbypop$State <- factor(stbypop$State, levels = stbypop$State)
 stbypop %>% ggplot(aes(x= State, y = tot_pop/100000)) + geom_bar(stat = "identity") + coord_flip()
 
