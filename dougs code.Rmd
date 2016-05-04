@@ -342,6 +342,65 @@ So, there is some level of correlation, but it doesn't look like enough to predi
 ## Correlation of State Rape Pct and Median Age for 2009
 The best would be to check  year-by-year state data, but this is not readily avaiable. But we can do a spot check of certain years of state data and see if the median age has any relationship to rape percentage. The year 2009 is available in the data. 
 
+#### from Sameen
+1. upload state wide data; explain data cleaning process both manual and R. 
+
+2. do a graph for each demographic and crime rate for ALL states for the most current year. 
+3. single out top 4 and bottom 4 states with worst crime rate and show a chart of them.
+5. show graphs using facet_wrap for top 4 states and the demographics data for current year, for over time; then for bottom 4;
+6. any correlations between the demographics for top 4 states? for bottom 4 states? do comparisons between the top 4 states to see trends. do you notice any trends between top 4 states data vs bottom 4's data in terms of which demographics jump out at you?
+
+
+
+
+```{r}
+# State data for 2012 compiled from multiple  American Community Survey tables (US Census Bureau) and from the FBI Uniform Crime Reporting database.
+
+stdem <- read.csv("states-key-demographics-2012.csv")
+
+# Population by state
+stbypop <- stdem %>% arrange(desc(tot_pop)) 
+stbypop$State <- factor(stbypop$State, levels = stbypop$State)
+stbypop %>% ggplot(aes(x= State, y = tot_pop/100000)) + geom_bar(stat = "identity") + coord_flip()
+
+# Murder and Rape percent by State
+stcrime <-stdem
+stcrime <- stcrime %>% mutate(rape_pct = num_rapes/tot_pop * 100000, murder_pct = num_murder/tot_pop * 100000)
+stcrime <- stcrime %>% arrange(desc(rape_pct)) 
+stcrime$State <- factor(stcrime$State, levels = stcrime$State)
+
+# Make the graph for rape and murder
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = murder_pct)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Percent of males
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_male)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Median age
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = median_age)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Average Income
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_male)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Racial Mix
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_white)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Educational attainment vs rape
+
+# Prevalence of single family households
+
+# Top four and bottom four
+
+
+
+stdem %>% ggplot(aes(x = pct * 100000,y = State)) + geom_point()
+
+
+
+```
+
+
+
+
 ```{r}
 # create the table doing a little mechanical transpose of one column
 st_pop <- read.csv("Sources/12s0013-residents-state-1960-2009.csv")

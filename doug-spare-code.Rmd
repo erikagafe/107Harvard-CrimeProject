@@ -49,7 +49,7 @@ choropleth(losangeles.msa, "lnden", main = "2010 US Census Tracts \n Los Angeles
 #cor.test(st_crime_means$st_rape_means,st_crime_means$st_murder_means)
 
 # state education table
-st_edu <-read.csv("Sources/12s0233-education-state.csv")
+st_edu <-read.csv("Archive/12s0233-education-state.csv")
 st_edu$year <- as.character(st_edu$year)
 st_murder_x <- st_murder %>% select(-United.States.Total) %>% gather(key = state, value = murders,Alabama:Wyoming)
 st_murder_x <- st_murder %>% filter(year >= 1970 & year <= 2009) 
@@ -60,6 +60,6 @@ st_murder_x <- st_murder %>% filter(year >= 1970 & year <= 2009)
 st_inc <-read.csv("Sources/11s0681-2011version-inc-state.csv")
 
 #state age-sex table
-st_basic <- read.csv("Sources/12s0016-age-sex-state.csv")
+st_basic <- read.csv("Archive/12s0016-age-sex-state.csv")
 
 ```

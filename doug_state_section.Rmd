@@ -1,0 +1,175 @@
+---
+title: "Doug State Section"
+author: "Doug Walton"
+date: "May 3, 2016"
+output: html_document
+---
+
+This is my contribution to the State section.
+
+
+
+First, to get set up
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(broom)
+library(knitr)
+
+
+```
+#### notes form Team Project
+1. upload state wide data; explain data cleaning process both manual and R. 
+
+2. do a graph for each demographic and crime rate for ALL states for the most current year. 
+3. single out top 4 and bottom 4 states with worst crime rate and show a chart of them.
+5. show graphs using facet_wrap for top 4 states and the demographics data for current year, for over time; then for bottom 4;
+6. any correlations between the demographics for top 4 states? for bottom 4 states? do comparisons between the top 4 states to see trends. do you notice any trends between top 4 states data vs bottom 4's data in terms of which demographics jump out at you?
+
+
+# State Demographic Data
+State data for 2012 compiled from multiple  American Community Survey tables (US Census Bureau) and from the FBI Uniform Crime Reporting database.
+
+
+```{r}
+
+stdem <- read.csv("states-key-demographics-2012.csv")
+
+# Population by state
+stbypop <- stdem %>% arrange(desc(tot_pop)) 
+stbypop$State <- factor(stbypop$State, levels = stbypop$State)
+stbypop %>% ggplot(aes(x= State, y = tot_pop/100000)) + geom_bar(stat = "identity") + coord_flip()
+
+# PUt in the percent for Murder and Rape  by State
+stcrime <-stdem
+stcrime <- stcrime %>% mutate(rape_pct = num_rapes/tot_pop * 100000, murder_pct = num_murder/tot_pop * 100000)
+stcrime <- stcrime %>% arrange(desc(rape_pct)) 
+stcrime$State <- factor(stcrime$State, levels = stcrime$State)
+
+# Make the graph for rape and murder
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = murder_pct)) + geom_bar(position='dodge',stat = "identity") + coord_flip() + labs(title = "Rates of Rape and Murder by State", x = "Number Rapes per 100,000")
+
+
+```
+The bars of the graph show the rape percent, and the color shows the murder percent. As the blue colors are fairly widely distributed, there doesn't seem to be a high correspondence of murder to rape.
+
+The plot also shows us the four worst and best states, listed below, which we will use later.
+
+Four with highest rape percent
+Alaska
+South Dakota
+Michigan
+New Mexico
+
+Four with lowest rape percent
+New Jersey
+New York
+Virginia
+Vermont
+
+In this next part, we explore a number of factors that could contribute to a high incidence of rape. A similar format is used to compare the factor against the rate of rape. 
+
+```{r}
+
+# Median age
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = median_age)) + geom_bar(position='dodge',stat = "identity") + coord_flip() + labs(title = "Rates of Rape and Median Age by State", x = "Number Rapes per 100,000")
+
+# Average Income
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = median_inc)) + geom_bar(position='dodge',stat = "identity") + coord_flip() + labs(title = "Rates of Rape and Average Income by State", x = "Number Rapes per 100,000")
+
+# Educational attainment vs rape
+# This gives a comparison factor for states by adding percentages for educational attainment for over 24 year olds, where the categories are less than grade 9, somewhere between 9 and 12, and high school grad
+stedu <- stcrime %>% mutate(non_hs = pct_less_9_over_24+pct_some_hs_over_24)
+stedu %>% ggplot(aes(x= State, y = rape_pct, fill = non_hs)) + geom_bar(position='dodge',stat = "identity") + coord_flip()  + labs(title = "Rates of Rape and High School Completion by State", x = "Number Rapes per 100,000")
+
+# HS completion
+stedu %>% ggplot(aes(x= State, y = rape_pct, fill = pct_hs_over_24)) + geom_bar(position='dodge',stat = "identity") + coord_flip()  + labs(title = "Rates of Rape and High School Completion by State", x = "Number Rapes per 100,000")
+
+
+```
+
+These don't seem to have much. If anything, it looks a little like lower HS attainment is related to lower rates of rape. 
+
+So, we trying a few more things. 
+
+```{r}
+# Percent of males - more males equals more prospective rapists
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_male)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Young Males - younger age group may be more inclined
+stcrime$pct_young_male <- stcrime$pct_young_male * 100
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_young_male)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Racial Mix using % white as proxy 
+stcrime %>% ggplot(aes(x= State, y = rape_pct, fill = pct_white)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+# Population density - larger, more open spaces with less oversight
+stcrime_lessDC <- stcrime %>% filter(State != "District of Columbia")
+stcrime_lessDC %>% ggplot(aes(x= State, y = rape_pct, fill = pop_density)) + geom_bar(position='dodge',stat = "identity") + coord_flip()
+
+
+
+```
+
+Of those, perhaps the following seemed to have some correlation:
+Percent of males
+Percent whites
+Population Density
+
+
+```{r}
+# Let's look at some of the factors on those specifically
+
+worst <- stcrime %>% filter(State %in% c("Alaska","South Dakota","Michigan","New Mexico")) %>% select(State,pct_male,pop_density,pct_white)
+worst$pct_male <- as.numeric(as.character(worst$pct_male))
+
+# Collect this for later
+wsum <- worst %>% summarise(mean(pct_male), mean(pop_density), mean(pct_white))
+
+# Transform for facets
+worst <- worst %>% gather(key = variable, Value = pct_male:pct_white)
+
+# Other ways to do it
+#ggplot(worst, aes(x=State, y=value)) + geom_bar(stat='identity') + facet_grid(.~variable, scales = "free") +coord_flip() + labs(x='',y='')
+
+#ggplot(worst,aes(x=State, y=value)) + geom_bar(stat='identity') + facet_grid(variable~., scales = "free") +coord_flip() + labs(x='',y='')
+
+ggplot(worst,aes(x=State, y=value)) + geom_bar(stat='identity') + facet_grid(variable~., scales = "free") + labs(title = "Worst States in 2012", x='',y='')
+
+
+```
+
+
+And here are the four states with the best percentage, compared.
+
+```{r}
+best <- stcrime %>% filter(State %in% c("New Jersey","New York","Virginia","Vermont")) %>% select(State,pct_male,pop_density,pct_white)
+best$pct_male <- as.numeric(as.character(best$pct_male))
+
+# Collect for later
+bsum <- best %>% summarise(mean(pct_male), mean(pop_density), mean(pct_white))
+
+# Transform for facets
+best <- best %>% gather(key = variable, Value = pct_male:pct_white)
+
+ggplot(best,aes(x=State, y=value)) + geom_bar(stat='identity') + facet_grid(variable~., scales = "free")  + labs(title = "Best States in 2012", x='',y='')
+
+
+```
+
+So, there are some possible indicators viewed this way. Racial mix, in the end seems, unlikely. However, larger, less policed areas with less people may be a contributing factor, and a greater percentage of males may increase the odds of one being prone to misconduct. A perhaps quick way to summarize them is below. 
+
+```{r}
+# make a table of averages
+s <- c("Worst","Best")
+sumt <- rbind(wsum,bsum)
+sum <- data.frame(s,sumt)
+kable(sum)
+
+```
+
+
+
+
