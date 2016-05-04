@@ -226,7 +226,8 @@ geom_point(aes(y=murderpct, color = " % Murder"))+ geom_point(aes(y = rapepct,co
 #xy<-full_join(y,x)
 #xy<-full_join(xy,m)
 
-gender<-ushousehold%>%select(tot_male,tot_female,murderpct,rapepct,residents,year1)%>% mutate(tot_male = tot_male/residents*100)%>% mutate(tot_female = tot_female/residents*100)%>%filter(year1>=2000 & year1<=2010)
+#%>%filter(year1>=2000 & year1<=2010)
+gender<-ushousehold%>%select(tot_male,tot_female,murderpct,rapepct,residents,year1)%>% mutate(tot_male = tot_male/residents*100)%>% mutate(tot_female = tot_female/residents*100)
 gender$year1 <- as.character(gender$year1)
 
 gender%>%ggplot(aes(year1)) + geom_point(aes(y=tot_male, color = "%total male pop"))  + geom_point(aes(y=tot_female, color = "%total female pop"))  +
