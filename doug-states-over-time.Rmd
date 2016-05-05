@@ -60,7 +60,7 @@ We can see from this certain states are high, like Alaska and Michigan. So we ca
 # I attempt to 'tidy' it up and maybe use that to make a better plot
 st_rape2 <- st_rape_pct
 st_rape2$y <- as.character(st_rape2$y)
-st_rape_tidy <- st_rape2 %>% select(Alabama:California) %>% gather(key = variable, value = Alabama:California, convert = TRUE)
+st_rape_tidy <- st_rape2 %>% gather(key = variable, value = Alabama:Wyoming)
 # but it has invalid column error - why?
 
 

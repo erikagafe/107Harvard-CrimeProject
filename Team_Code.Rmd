@@ -539,6 +539,7 @@ geom_point() + labs(title = "Rates of Rape and Percentage Whites by State", y = 
 Population density - larger, more open spaces with less oversight will cause more rapes or less dense spaces will be a contributing factor to rape. Lets see:
 ```{r}
 #smoothed version
+stcrime_lessDC <- stcrime %>% filter(State != "District of Columbia")
 stcrime_lessDC %>% ggplot(aes(x= pop_density, y = rape_pct)) + 
 geom_point() + labs(title = "Rates of Rape and Population Density by State", y = "Number Rapes per 100K people", x = "Population Density") + geom_smooth()
 ```
