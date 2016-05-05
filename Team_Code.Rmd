@@ -38,6 +38,7 @@ on homicide and rape across U.S. States.
 
 ### SCOPE
 We started this project with the goal of analyzing demographic effects on USA, Canada and European countries. When collecting the data we ran through so many problems and inconsistencies and due to time shortage that we decided to scale back our scope to USA and its states only. 
+
 1. Household type (only list and use the percent of single family huseholds)
 
 2. Age (median age)
@@ -57,10 +58,10 @@ We started this project with the goal of analyzing demographic effects on USA, C
 Our research followed two different approaches. The first is a historical approach to see how thing changed over time across nations under study. The second is a comparison between state-to-state and county-to-county to see effects of demographics on crime.
 
 ##Approach #1
-Look at national data over time. In particular we will be exploring how demographic effects on crime within USA over time.
+We will ook at national data over time. In particular we will be exploring how demographic effects on crime within USA over time.
 
 ##Approach #2
-looking at 2015 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
+We will look at 2012 data for all U.S. states for all demographic data to fnd trends. Then doing a deeper dive of previous years for particular states.
 
 
 we will be using the following libraries in our analysis:
@@ -81,7 +82,7 @@ Starting with tables derived from the 2012 Statistical Abstract of the United St
 
 1. us_national.csv is population by year from 1900 to 2015. initially derived from Section 1, Tables 1 & 2. Lagging zeros filled in on earlier years to make everything in consistent units (removed '000s reduction). Added years 2010 to 2015 from PEPANNRES annual estimates of population (found through American Fact Finder.)
 
-I then take selected chosen areas from different census tables to add to this national master.
+We then take selected chosen areas from different census tables to add to this national master.
 
 A based table is constructed from the UC census table 12s0059.xls from the U.S. Statistical Abstract 2012, which covers 1960 to 2010, and then selected householder characteristics for 2011 to 2014 are added from the ACS filess and B11001, B11001A, B11001I to create 12s0059-households.csv. (Tables can be found using American Fact Finder)
 
@@ -89,7 +90,7 @@ A based table is constructed from the UC census table 12s0059.xls from the U.S. 
 
 4. Educational attainment. The table is constructed from 12s0230.xls as the base. It gives 1960 to 2010 for sex and ethnicity, but only high school+ and college+ were available. Later years would have to be added from ACS tables in the C15002 series, but the categorization of educational attainment is diferrent, making the matching of the numbers difficult. 
 
-5. Murder and Rape. Compiled from .... and also UCR ucr-us-murder1960-2012.csv. , ucr-us-rape1960-2012.csv
+5. Murder and Rape. Compiled from the table generator of the FBI Uniform Crime Reporting system (UCR) into files ucr-us-murder1960-2012.csv and ucr-us-rape1960-2012.csv
 
 ### DATA SCRAPING, CLEANUP AND LESSONS LEARNED
 
@@ -172,7 +173,7 @@ As can be seen in the tables and commentary above, while there is a considerable
 
 
 ###National Rate of Homicide and Rape
-2. For a first pass, we explore the general trends for rape and homicide for the dataset we have by extracting the relevant years and converting the totals in the table to occurrances per 100,000 people to filter out the effect of general population growth and make the numbers more readable.
+For a first pass, we explore the general trends for rape and homicide for the dataset we have by extracting the relevant years and converting the totals in the table to occurrances per 100,000 people to filter out the effect of general population growth and make the numbers more readable.
 
 
 ```{r}
@@ -202,7 +203,7 @@ dat %>% ggplot(aes(year1)) + geom_point(aes(y=rapepct)) + geom_line(aes(x=year1,
 A significant pattern can be seen here in rape rates throughout the years, it started with rape rates increasing up until early 1990s and then all of a sudden the rates started to drop significantly and have been on a downward trend ever since. 
 
 
-now lets see if we see any trends in the murder rates
+Now lets see if we see any trends in the murder rates
 ```{r}
 # fitting line to murderpct data using loess to see about the trend
 mod <- loess(murderpct~year1, degree=2, span = 1, data=dat)
@@ -213,11 +214,11 @@ dat %>% ggplot(aes(year1)) + geom_point(aes(y=murderpct)) + geom_line(aes(x=year
 ```
 
 # 
-a similar pattern is spotted in the murder data, this time the peak was alot earlier in the 1980s and murder rates have been decreasing ever since. The declining slope is steeper in murder rates then rape rates.
+A similar pattern is spotted in the murder data, this time the peak was alot earlier in the 1980s and murder rates have been decreasing ever since. The declining slope is steeper in murder rates then rape rates.
 
 ####1. Household type 
 
-We assume that single parent families would have higher crime rate overall than nuclear family systems, lets see if the data supports that theory.The graphs below only takes into account single male and single female households and compares it to rape and murder rates.
+We assume that single parent families would have higher crime rate overall than nuclear family systems, lets see if the data supports that theory.The graphs below only take into account single male and single female households and compare them to rape and murder rates.
 	
 ```{r}
 ushousehold <- rap_hom %>% mutate (single_householdpct =((male_household + fem_household)/residents)*100000)%>% mutate(housepct = (couple_household/residents)*100000) 
@@ -236,7 +237,7 @@ Up until the 1990s single family households had the same upward trend like rape;
 We will now examine the impacts of age on rape and murder. In particular we will look at the national median age across the years and and any corelations it may have with rape or murder. 
 
 
-we will first add the data in manually in arrays as our data source is a pdf file (Data source: [US census Bureau](https://www.census.gov/prod/cen2010/briefs/c2010br-03.pdf)). 	
+We will first add the data in manually in arrays as our data source is a pdf file (Data source: [US census Bureau](https://www.census.gov/prod/cen2010/briefs/c2010br-03.pdf)). 	
 ```{r}
 
 year1 <- seq(1960,2010, 10)
@@ -264,7 +265,7 @@ It seems here that the age group that might have some co-relations with the murd
 
 
 ####3. Gender 
-We will now shift our focus to impacts of gender on national rape and murder rate. THe assumption we made was that maybe rape and murder is related to more male populations. Lets see if our assumption holds true
+We will now shift our focus to impacts of gender on national rape and murder rate. The assumption we made was that maybe rape and murder is related to more male populations. Lets see if our assumption holds true
 ```{r}
 
 gender<-ushousehold%>%select(tot_male,tot_female,murderpct,rapepct,residents,year1)%>% mutate(tot_male = tot_male/residents*100)%>% mutate(tot_female = tot_female/residents*100)%>%filter(year1>=2000 & year1<=2010)
@@ -277,7 +278,7 @@ Unfortunately since the ratio of men and women in USA is very close (49%-51%) we
 
 ####4. Race 
 
-Now will look to see if a particular race is more prominent in crime areas. If immigration (non-white population) impacts crime rates. Our assumption is, the more immigration (non-white) population that enters the USA the lesser the crime rates. Lets see if this assumption holds:
+Now will look to see if a particular race is more prominent in crime areas. That is, does immigration (non-white population) impact crime rate? Our assumption is, the more immigration (non-white) population that enters the USA the lesser the crime rates. Lets see if this assumption holds:
 
 ```{r}
 
@@ -290,7 +291,7 @@ race$year1 <- as.character(race$year1)
 race%>%ggplot(aes(year1)) + geom_point(aes(y=white_pop, col="White Population")) + geom_point(aes(y=black_pop, col="Black population")) + geom_point(aes(y=hisp_pop, col="Hispanic Population")) + geom_point(aes(y=murderpct, color = " % Murder"))+ geom_point(aes(y = rapepct,color=" % Rape "))+ labs(title="Rape and Murder vs Race", y="Rate per 100k", col="Race", x= "year")
 ```
 
-our findings are inconclusive as we did not have enough data to look at a larger yearly sample. But one major finding here is that as the 'white population' decreases over the years, so does both murder and rape rates. We know this from previous analysis where we know that in general both murder and rape rates have been on a decreasing trend since the 1990s and now we are looking at immigration/race rates and see that the white population is decreasing at a similar rate as the decrease in rape and murder rate.
+Our findings are inconclusive as we did not have enough data to look at a larger yearly sample. But one major finding here is that as the 'white population' decreases over the years, so does both murder and rape rates. We know this from previous analysis where we know that in general both murder and rape rates have been on a decreasing trend since the 1990s and now we are looking at immigration/race rates and see that the white population is decreasing at a similar rate as the decrease in rape and murder rate.
 
 ####5. Education 
 
@@ -326,9 +327,7 @@ ushousehold%>% ggplot(aes(year1)) + geom_point(aes(y=inc_median_all_male, col="M
 ```
 Its nice to see that the income disparity gap between males and females is closing down. There is a big jump to close this game in the 1990s especially, and as we may remember, the crime rates for murder and rape start to decrease exactly around the same year. Could it be as women become more independent and earn more money, there is less rapes occuring. Our data ofcourse cannot make such a big conclusion but its interesting to see that there is a corelation between the income disparity between the genders and crime rate.
 
-
-
-lets now compare medan income to crime rate, do they have a similar trend like income disparity did on crime. Lets see:
+Let us now compare medan income to crime rate, do they have a similar trend like income disparity did on crime. Lets see:
 
 ```{r}
 income<-rap_hom%>%mutate(total_income=(inc_median_all_male+inc_median_all_female)/2)%>%mutate(total_incomepct=((inc_median_all_male+inc_median_all_female)/residents*100000))
@@ -341,8 +340,6 @@ income%>% ggplot(aes(year1)) + geom_point(aes(y=total_incomepct,  col='% Total m
 In general, the median income is unstable across the nation. So our findings are inconclusive in regards to median income impacting rape or murder rates. Although, the biggest dip in median income occured in the 1980s and thats when we had the peak rape rates and murder rates. And taking a closer look now, we noticed that the second major increase in murder and rape rates occured just after the 1990s and thats when there was another big dip in median income. so infact there is a corelation between low median income and higher crime rate. 
 
 
-
-
 ##7. Population 
 impacts of population on murder and rape rates	
 ```{r}
@@ -351,10 +348,31 @@ ushousehold %>% ggplot(aes(year1))+ geom_point(aes(y=forcible_rape, col="forcibl
 
 As population increases murder and rape rate decrease, but there is a very small if any relation between the two. we would need to do much more analysis to be able to associate population with those two crime rates. 
 
+## A Logistic Model
 
+Is there a model of some of these key factors that would fit this? Here we take selected factors pertaining to traditional households, income, and educational attainment and try to fit a model. (glm or lm? not sure it makes a difference but maybe take a closer look)
+
+```{r}
+usnat_sub1 <- usnat2 %>% filter(year <= 'X2010' & year >= 'X2000') %>% mutate(murderpct = murder/(residents/1000), rapepct = forcible_rape/(residents/1000), housepct = (couple_household/residents)*1000)
+
+# here a logisic regression is fit for murder.
+fit <- usnat_sub1 %>% glm(murderpct ~ couple_household + inc_median_all_male + inc_median_all_female + hs.all.male + hs.all.female + col.all.male + col.all.female, data = .)
+summary(fit)
+
+# here a logisic regression is fit for rape
+fit <- usnat_sub1 %>% glm(rapepct ~ couple_household + inc_median_all_male + inc_median_all_female + hs.all.male + hs.all.female + col.all.male + col.all.female, data = .)
+summary(fit)
+
+```
+
+On a casual, look it seems rape is a little better fit, but while this model does suggest some correlations, it seems likely there is more to the picture that would need to be explored. Also, there is the time delay effect - that changes in the factors might not effect the murder/crime rate in the same year.
 
 
 #Approach 2
+In approach 2, we compare state to state for the year 2012. This was the latest year for which a good set of the needed data was available. 
+
+In this section, we focus more on rape specifically, because in the national views there was divergence where rape around the 1990s seemed to significantly increase over murder rate. This suggests there are unique factors that might be interesting.
+
 # State Demographic Data
 State data for 2012 compiled from multiple  American Community Survey tables (US Census Bureau) and from the FBI Uniform Crime Reporting database.
 
@@ -492,7 +510,7 @@ stcrime %>% ggplot(aes(x= pct_male, y = rape_pct)) +
 geom_point() + labs(title = "Rates of Rape and Percent of Males by State", y = "Number Rapes per 100K people", x = "Percent Males") + geom_smooth()
 ```
 
-Dont really see much trend here as most states have similar male/female ratios; however we do see that a few states that do have more then 50% male population the rape rate significantly increases. But since thats only a couple of cases where the population of males is high we cannot make any conclusions here. 
+We don't really see much trend here as most states have similar male/female ratios; however we do see that a few states that do have more then 50% male population the rape rate significantly increases. But since thats only a couple of cases where the population of males is high we cannot make any conclusions here. 
 
 In this scenerio, we are going to dive a bit deeper; we are going to look to see if having more younger males in a state have any impact on rape. The next few graphs will focus on younger male ratios in a state and its effects on rape rates.
 
